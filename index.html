@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="zh-cn" dir="ltr">
+  <head>
+    <meta charset="UTF-8" />
+    <title>HTML5 Filesystem API Demo</title>
+    <script type="text/javascript" src="jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="jquery.base64.min.js"></script>
+    <script type="text/javascript" src="qiniu.uploader.js?id=3"></script>
+  </head>
+  <body>
+    <header>
+        <h1>HTML5文件API示例</h1>
+    </header>
+    <section>
+        <form id="filelist_sample" name="filelist_sample">
+            <label for="selectFiles">请选择文件（可多选）：</label>
+            <input type="file" name="selectFiles" id="selectFiles" multiple="multiple"/>  
+            <button type="button" id="upladBtn" name="uploadBtn">上传文件</button><br/>  
+            <button type="button" id="showInfoBtn" name="showInfoBtn">显示文件信息</button><br/>  
+            <button type="button" id="txtBtn" name="txtBtn">测试 readAsText</button>  
+            <button type="button" id="binBtn" name="binBtn">测试 readAsBinaryString</button>  
+            <button type="button" id="urlBtn" name="urlBtn">测试 readAsDataURL</button>  
+        </form>
+        <div id="fileContent"></div>
+        <footer>
+            <table id="info">
+                <caption>文件信息</caption>
+                <thead>
+                    <tr>
+                        <th>ID</th>
+                        <th>文件名</th>
+                        <th>文件类型</th>
+                        <th>文件大小（KB）</th>
+                        <th>最后修改日期</th>
+                    </tr>
+                </thead>
+                <tfoot>
+                    <tr>
+                        <th>合计：</th>
+                        <th><meter id="count" value="0" min="0" max="10">0</meter></th>  
+                        <th></th>  
+                        <th><meter id="sum" value="0" min="0" >0</meter></th>  
+                        <th><button type="button" id="clearBtn">清除信息</button></th>  
+                    </tr>
+                </tfoot>
+            </table>
+        </footer>
+    </section>
+    <footer>
+        <div id="console"></div>
+    </footer>  
+  </body>
+</html>
