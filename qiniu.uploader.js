@@ -24,50 +24,52 @@ Qiniu = {
     },
 
     token: function() {
-        return '6Ua-pviUhl0k75Juee5wOxb4LxXC_iGUxJQFBtzf:Q0ZEXiBrEtAgyk8nxHYPFkyJ38o=:eyJzY29wZSI6ImljYXR0bGVjb2RlcjMiLCJkZWFkbGluZSI6MTQ2Mzc4ODc4NX0='
+        return '6Ua-pviUhl0k75Juee5wOxb4LxXC_iGUxJQFBtzf:1QBFZxQVfliMlI0Av_yhVFoZEx4=:eyJzY29wZSI6ImljYXR0bGVjb2RlcjM6c3Nzc3MiLCJkZWFkbGluZSI6MTQ2Mzc5MzIxN30='
     },
 
     onBlockPutFinished: function() {
 
     },
 
-    onMkblkFinished: function(ret, file, blkIdex, offset, blkSize) {
+    onPutBlockFinished: function(file, blkIdex, blksize, blkCnt) {
 
     },
 
-    mkblk: function(file, blkIdex, offset, blksize) {
+    onMkblkFinished: function(ret, file, blkIdex, offset, blkSize, blkCnt) {
+
+    },
+
+    onProgress: function(p) {
+
+    },
+
+    mkblk: function(file, blkIdex, offset, blksize, blkCnt) {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', this.UploadUrl + "/mkblk/" + blksize, true);
         xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
-        var blob = file.slice(blkIdex * blksize, this.chunk(offset, blksize));
-        console.log("start=", blkIdex * blksize)
-        console.log("size=", this.chunk(offset, blksize))
+        var cks = this.chunk(offset,blksize);
+        var blob = file.slice(blkIdex * blksize, cks);
+        Qiniu.chunks+=cks;
         xhr.onreadystatechange = function(response) {
             if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
-            	// alert("log")
-                //checksum,crc32,ctx,host,offset
                 var blkRet = JSON.parse(xhr.responseText);
-                Qiniu.Progresses[blkIdex] = blkRet;
-                // if (blkRet != null) {
-                    // Qiniu.putRet = blkRet
-                    // console.log("blkRet",blkRet)
-                    // return
-                    // console.log("offset = ", blkRet["offset"])
+                if (blkRet) {
+                    Qiniu.onProgress(Qiniu.chunks/file.size);
+                    Qiniu.Progresses[blkIdex] = blkRet;
                     if (blkRet["offset"] < offset) {
-                        alert("loadStart")
                         return
                     }
 
-                    Qiniu.onMkblkFinished(blkRet, file, blkIdex, blkRet["offset"], blksize);
-                // }
+                    Qiniu.onMkblkFinished(blkRet, file, blkIdex, blkRet["offset"], blksize, blkCnt);
+                }
             }
         };
         xhr.send(blob);
     },
 
-    putRet:null,
+    putRet: null,
 
-    putblk: function(file, blkIdex, offset, blksize, preRet) {
+    putblk: function(file, blkIdex, offset, blksize, preRet, blkCnt) {
         if (preRet == null) {
             return;
         }
@@ -76,101 +78,85 @@ Qiniu = {
         xhr.open('POST', this.UploadUrl + "/bput/" + preRet["ctx"] + "/" + offset, true);
         xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
         var start = blkIdex * blksize + offset;
-        var end = start + this.chunk(offset,blksize);
+        var cks = this.chunk(offset, blksize)
+        var end = start + cks;
         var blob = file.slice(start, end);
+        Qiniu.chunks += cks; 
 
         xhr.onreadystatechange = function(response) {
             if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
-                //checksum,crc32,ctx,host,offset
-                // console.log(xhr.responseText)
                 var blkRet = JSON.parse(xhr.responseText);
-                if(blkRet!=null){
+                if (blkRet != null) {
+                    Qiniu.onProgress(Qiniu.chunks/file.size);
                     Qiniu.Progresses[blkIdex] = blkRet;
                 }
-                // if(blkRet!=null){
-                //     Qiniu.putRet = blkRet
-                //      console.log("blkRet",blkRet);
-                //      return;
-                // }
-                // alert("log")
-                // console.log("blkIdex=", blkIdex);
-                // console.log("putoffset=", blkRet["offset"]);
                 if (blkRet["offset"] < offset) {
-                    alert("loadStart")
                     return
                 }
-                // if (Qiniu.de < 20) {
-                    if (blkRet["offset"] < blksize) {
-                        Qiniu.putblk(file, blkIdex, blkRet["offset"], blksize, blkRet);
-                    } else {
-                        Qiniu.mkfile("icattlecoder3:sssss",file.size)
-
-                    }
-                    // Qiniu.de++;
-                // }
+                if (blkRet["offset"] < blksize) {
+                    Qiniu.putblk(file, blkIdex, blkRet["offset"], blksize, blkRet, blkCnt);
+                } else {
+                    Qiniu.onBlockPutFinished(file, blkIdex, blksize, blkCnt)
+                }
             }
         }
-
         xhr.send(blob);
     },
-    de: 0,
-    chunkSize: 1024*256,
 
-    resumbalePutBlock: function(file, blkIdex, blksize) {
+    chunkSize: 1024 * 256,
 
-        this.onMkblkFinished = function(ret, file, blkIdex, offset, blksize) {
-            //
-            this.putblk(file, blkIdex, offset, blksize, ret);
-        }
-        this.mkblk(file, blkIdex, 0, blksize);
+    chunks: 0,
 
-        // onMkblkFinished
+    resumbalePutBlock: function(file, blkIdex, blksize, blkCnt) {
 
-        // while (this.progress[blkIdex]["offset"] < size) {
-        // 	bodyLength = (chunkSize < (this.blkSize - this.Progresses [blkIdex]["offset"])) ? chunkSize : (this.blkSize - extra.Progresses [blkIdex]["offset"]);
-        // 	blob = file.slice(this.blkSize*blkIdex + this.Progresses[blkIdex]["offset"]*checksum)
-        // 	blkput(blob)
-
-        // }
-
-
-
-        // var xhr = new XMLHttpRequest();
-        // xhr.open('POST', this.UploadUrl + "/mkblk/" + blkSize, true);
-        // xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
-        // xhr.onreadystatechange = function(response) {
-        //     if (xhr.readyState == 4 && xhr.status == 200) {
-        //         //checksum,crc32,ctx,host,offset
-        //         var blkRet = JSON.parse(xhr.responseText);
-        //         this.progress.push(blkRet);
-        //     }
-        // };
-        // xhr.send(f.slice(0, 256));
+        //...n-1,n,end ,up next block
+        this.onBlockPutFinished = function(file, blkIdex, blksize, blkCnt) {
+            if (blkIdex < blkCnt) {
+                console.log("resu=", blkIdex + 1)
+                this.resumbalePutBlock(file, ++blkIdex, this.getBlksize(file.size, blkIdex), blkCnt);
+            } else {
+                Qiniu.mkfile(file, "icattlecoder3:sssss", file.size);
+            }
+        };
+        this.onMkblkFinished = function(ret, file, blkIdex, offset, blksize, blkCnt) {
+            //2,3,4,5,...,
+            this.putblk(file, blkIdex, offset, blksize, ret, blkCnt);
+        };
+        //1
+        this.mkblk(file, blkIdex, 0, blksize, blkCnt);
     },
 
-    mkfile: function(key, fsize) {
+    mkfile: function(file, key, fsize) {
 
-        body =  "";
+        body = "";
+
         var len = Qiniu.Progresses.length;
 
-        for (var i = 0; i < len-1; i++) {
-            body += Qiniu.Progresses[i]["ctx"]
-            body += ','
+        for (var i = 0; i < len - 1; i++) {
+            body += Qiniu.Progresses[i]["ctx"];
+            body += ',';
         }
-        body+=Qiniu.Progresses[len-1]["ctx"];
+        body += Qiniu.Progresses[len - 1]["ctx"];
         var xhr = new XMLHttpRequest();
-        xhr.open('POST', this.UploadUrl + "/rs-mkfile/"+$.base64.encode(key)+"/fsize/" + fsize, true);
+        var url = this.UploadUrl + "/rs-mkfile/" + $.base64.encode(key) + "/fsize/" + fsize;
+        url = url + "/mimeType/" + $.base64.encode(file.type);
+        xhr.open('POST', url, true);
         xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
+        xhr.onreadystatechange = function(response) {
+            if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
+                var blkRet = JSON.parse(xhr.responseText);
+                // console.log(blkRet);
+                alert("上传成功")
+            }
+        }
         xhr.send(body);
-
     },
 
-    Upload:function(key)
-    {
-    	var  xhr = new XMLHttpRequest();
-        xhr.open('POST', 'http://127.0.0.1:31010/' , true);
-		var formData, xhr;
-		f = this.files[0];
+    Upload: function(key) {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', 'http://127.0.0.1:31010/', true);
+        var formData, xhr;
+        f = this.files[0];
         formData = new FormData();
         formData.append('key', "ssjsuploadTests");
         formData.append('token', Qiniu.token());
@@ -183,53 +169,26 @@ Qiniu = {
             }
         };
         xhr.send(formData);
+    },
 
+    getBlksize: function(fsize, blkIdex) {
+        return fsize > (blkIdex + 1) * this.BLKSize ? this.BLKSize : fsize - blkIdex * this.BLKSize;
     },
 
     ResumbleUpload: function(key) {
 
         f = this.files[0];
 
-        // var formData, xhr;
-
-        // formData = new FormData();
-        // formData.append('key', "jsuploadTest");
-        // formData.append('token', Qiniu.token());
-        // formData.append('file', f.slice(0, 100));
-
+        this.Progresses.length = 0;
 
         size = f.size;
 
-        blkCnt =  this.blockCnt(size)
+        blkCnt = this.blockCnt(size)
 
-        console.log('size = ', size);
-        console.log('blkCnt = ', blkCnt);
+        this.chunks = 0;
 
-        var i = 0;
-        for (i = 0; i < blkCnt - 1; i++) {
-            this.resumbalePutBlock(f, i, this.BLKSize);
-        }
-        //最后一块
-        console.log("lastSize=", size - (blkCnt) * this.BLKSize);
-        this.resumbalePutBlock(f, i, size - (blkCnt) * this.BLKSize);
-
-
-
-        // xhr = new XMLHttpRequest();
-        // xhr.open('POST', 'http://127.0.0.1:31010/mkblk/' + blkSize, true);
-        // xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
-
-
-        // xhr.onreadystatechange = function(response) {
-        //     if (xhr.readyState == 4 && xhr.status == 200) {
-        //         //checksum,crc32,ctx,host,offset
-        //         var blkRet = JSON.parse(xhr.responseText);
-        //     }
-        // };
-        // xhr.send(f.slice(0, 256));
-
-
-    },
+        this.resumbalePutBlock(f, 0, this.getBlksize(f.size, 0), blkCnt);
+    }
 }
 if (typeof FileReader == "undefined") {
     alert("您的浏览器未实现FileReader接口！");
@@ -247,7 +206,10 @@ jQuery.fn.files = function() {
 //“显示文件信息”按钮的click事件代码
 $(function() {
     $("#upladBtn").click(function(event) {
-
+        Qiniu.onProgress = function(p) {
+            // $("txt_pro").val(p)
+            console.log("progress=",p)
+        }
         Qiniu.fileInput("#selectFiles");
         Qiniu.ResumbleUpload("");
 
