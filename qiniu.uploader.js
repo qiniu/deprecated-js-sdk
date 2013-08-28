@@ -1,65 +1,132 @@
-//typeof File
-Qiniu = {
+(function() {
+    var strTable = "00000000 77073096 EE0E612C 990951BA 076DC419 706AF48F E963A535 9E6495A3 0EDB8832 79DCB8A4 E0D5E91E 97D2D988 09B64C2B 7EB17CBD E7B82D07 90BF1D91 1DB71064 6AB020F2 F3B97148 84BE41DE 1ADAD47D 6DDDE4EB F4D4B551 83D385C7 136C9856 646BA8C0 FD62F97A 8A65C9EC 14015C4F 63066CD9 FA0F3D63 8D080DF5 3B6E20C8 4C69105E D56041E4 A2677172 3C03E4D1 4B04D447 D20D85FD A50AB56B 35B5A8FA 42B2986C DBBBC9D6 ACBCF940 32D86CE3 45DF5C75 DCD60DCF ABD13D59 26D930AC 51DE003A C8D75180 BFD06116 21B4F4B5 56B3C423 CFBA9599 B8BDA50F 2802B89E 5F058808 C60CD9B2 B10BE924 2F6F7C87 58684C11 C1611DAB B6662D3D 76DC4190 01DB7106 98D220BC EFD5102A 71B18589 06B6B51F 9FBFE4A5 E8B8D433 7807C9A2 0F00F934 9609A88E E10E9818 7F6A0DBB 086D3D2D 91646C97 E6635C01 6B6B51F4 1C6C6162 856530D8 F262004E 6C0695ED 1B01A57B 8208F4C1 F50FC457 65B0D9C6 12B7E950 8BBEB8EA FCB9887C 62DD1DDF 15DA2D49 8CD37CF3 FBD44C65 4DB26158 3AB551CE A3BC0074 D4BB30E2 4ADFA541 3DD895D7 A4D1C46D D3D6F4FB 4369E96A 346ED9FC AD678846 DA60B8D0 44042D73 33031DE5 AA0A4C5F DD0D7CC9 5005713C 270241AA BE0B1010 C90C2086 5768B525 206F85B3 B966D409 CE61E49F 5EDEF90E 29D9C998 B0D09822 C7D7A8B4 59B33D17 2EB40D81 B7BD5C3B C0BA6CAD EDB88320 9ABFB3B6 03B6E20C 74B1D29A EAD54739 9DD277AF 04DB2615 73DC1683 E3630B12 94643B84 0D6D6A3E 7A6A5AA8 E40ECF0B 9309FF9D 0A00AE27 7D079EB1 F00F9344 8708A3D2 1E01F268 6906C2FE F762575D 806567CB 196C3671 6E6B06E7 FED41B76 89D32BE0 10DA7A5A 67DD4ACC F9B9DF6F 8EBEEFF9 17B7BE43 60B08ED5 D6D6A3E8 A1D1937E 38D8C2C4 4FDFF252 D1BB67F1 A6BC5767 3FB506DD 48B2364B D80D2BDA AF0A1B4C 36034AF6 41047A60 DF60EFC3 A867DF55 316E8EEF 4669BE79 CB61B38C BC66831A 256FD2A0 5268E236 CC0C7795 BB0B4703 220216B9 5505262F C5BA3BBE B2BD0B28 2BB45A92 5CB36A04 C2D7FFA7 B5D0CF31 2CD99E8B 5BDEAE1D 9B64C2B0 EC63F226 756AA39C 026D930A 9C0906A9 EB0E363F 72076785 05005713 95BF4A82 E2B87A14 7BB12BAE 0CB61B38 92D28E9B E5D5BE0D 7CDCEFB7 0BDBDF21 86D3D2D4 F1D4E242 68DDB3F8 1FDA836E 81BE16CD F6B9265B 6FB077E1 18B74777 88085AE6 FF0F6A70 66063BCA 11010B5C 8F659EFF F862AE69 616BFFD3 166CCF45 A00AE278 D70DD2EE 4E048354 3903B3C2 A7672661 D06016F7 4969474D 3E6E77DB AED16A4A D9D65ADC 40DF0B66 37D83BF0 A9BCAE53 DEBB9EC5 47B2CF7F 30B5FFE9 BDBDF21C CABAC28A 53B39330 24B4A3A6 BAD03605 CDD70693 54DE5729 23D967BF B3667A2E C4614AB8 5D681B02 2A6F2B94 B40BBE37 C30C8EA1 5A05DF1B 2D02EF8D".split(' ');
 
-    //setting
+    var table = [];
+    for (var i = 0; i < strTable.length; ++i) {
+        table[i] = parseInt("0x" + strTable[i]);
+    }
+
+    /* Number */
+    crc32 = function( /* String */ str, /* Number */ crc) {
+        if (crc == window.undefined) crc = 0;
+        var n = 0; //a number between 0 and 255
+        var x = 0; //an hex number
+
+        crc = crc ^ (-1);
+        for (var i = 0, iTop = str.length; i < iTop; i++) {
+            n = (crc ^ str.charCodeAt(i)) & 0xFF;
+            crc = (crc >>> 8) ^ table[n];
+        }
+        return crc ^ (-1);
+    };
+})();
+
+if (typeof FileReader == "undefined") {
+    alert("您的浏览器未实现FileReader接口！");
+}
+//typeof File
+var Qiniu = {
+
+    /******************
+     * Settings
+     ******************/
     blockBits: 22,
     blockMask: (1 << this.blockBits) - 1,
     BLKSize: 4 * 1024 * 1024,
+    chunkSize: 1024 * 256,
+
+    //count
+    chunks: 0,
 
     blockCnt: function(fsize) {
         return (fsize + this.blockMask) >> this.blockBits;
     },
+
     chunk: function(offset, blkSize) {
         return this.chunkSize < (blkSize - offset) ? this.chunkSize : (blkSize - offset);
     },
 
-    Progresses: new Array(),
+    Progresses: [],
 
     UploadUrl: "http://127.0.0.1:31010",
 
-    files: '',
+    files: undefined,
 
+    //jquery based
     fileInput: function(_fileInput) {
         return this.files = $(_fileInput).files();
     },
 
-    token: function() {
-        return '6Ua-pviUhl0k75Juee5wOxb4LxXC_iGUxJQFBtzf:1QBFZxQVfliMlI0Av_yhVFoZEx4=:eyJzY29wZSI6ImljYXR0bGVjb2RlcjM6c3Nzc3MiLCJkZWFkbGluZSI6MTQ2Mzc5MzIxN30='
+    //请求上传凭证时附带的客户端参数，用于生成uptoken
+    //如：提交自定义的表单
+    putExtra: undefined,
+
+    //App server颁发上传凭证的Url,返回客户端正确的uptoken
+    signUrl: '',
+
+    token: undefined,
+
+    ReqToken: function() {
+        var xhr = new XMLHttpRequest();
+        xhr.open('POST', Qiniu.signUrl, true);
+        formData = new FormData();
+        if (this.putExtra) {
+            formData.append('putExtra', this.putExtra);
+        }
+        formData.append('key', "sssss");
+        xhr.onreadystatechange = function(response) {
+            console.log(xhr.responseText)
+            if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
+                Qiniu.onUpToken(xhr.responseText);
+            }
+        }
+        xhr.send(formData);
     },
 
-    onBlockPutFinished: function() {
+    /************************
+     * events
+     *************************/
 
-    },
+    onBlockPutFinished: function() {},
 
-    onPutBlockFinished: function(file, blkIdex, blksize, blkCnt) {
+    onPutBlockFinished: function(file, blkIdex, blksize, blkCnt) {},
 
-    },
+    onMkblkFinished: function(ret, file, blkIdex, offset, blkSize, blkCnt) {},
 
-    onMkblkFinished: function(ret, file, blkIdex, offset, blkSize, blkCnt) {
+    onProgress: function(p) {},
 
-    },
+    onPutFinished: function(fsize, result) {},
 
-    onProgress: function(p) {
+    onPutFailure: function(msg) {},
 
-    },
+    onUpToken: function(token) {},
 
-    mkblk: function(file, blkIdex, offset, blksize, blkCnt) {
+    onBeforeUp: function() {},
+
+    //============================================================
+
+    // history: {
+
+    // },
+
+    //============================================================
+
+
+    mkblk: function(file, blkIdex, blksize, blkCnt) {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', this.UploadUrl + "/mkblk/" + blksize, true);
         xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
-        var cks = this.chunk(offset,blksize);
-        var blob = file.slice(blkIdex * blksize, cks);
-        Qiniu.chunks+=cks;
+        var cks = this.chunk(0, blksize);
+
+        var blob = this.slice(file, Qiniu.chunks, cks);
+
         xhr.onreadystatechange = function(response) {
             if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
                 var blkRet = JSON.parse(xhr.responseText);
                 if (blkRet) {
-                    Qiniu.onProgress(Qiniu.chunks/file.size);
+                    Qiniu.chunks += cks;
+                    Qiniu.onProgress(Qiniu.chunks / file.size);
                     Qiniu.Progresses[blkIdex] = blkRet;
-                    if (blkRet["offset"] < offset) {
-                        return
-                    }
-
                     Qiniu.onMkblkFinished(blkRet, file, blkIdex, blkRet["offset"], blksize, blkCnt);
                 }
             }
@@ -67,52 +134,55 @@ Qiniu = {
         xhr.send(blob);
     },
 
-    putRet: null,
+    //读取文件切片
+    slice: function(f, start, size) {
+
+        if (f.slice) {
+            return f.slice(start, start + size);
+        }
+        if (f.webkitSlice) {
+            return f.webkitSlice(start, start + size);
+        }
+        return null;
+    },
 
     putblk: function(file, blkIdex, offset, blksize, preRet, blkCnt) {
         if (preRet == null) {
             return;
         }
-
+        if (file.size <= Qiniu.chunks) {
+            Qiniu.onBlockPutFinished(file, blkIdex, blksize, blkCnt);
+            return;
+        }
         var xhr = new XMLHttpRequest();
         xhr.open('POST', this.UploadUrl + "/bput/" + preRet["ctx"] + "/" + offset, true);
         xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
-        var start = blkIdex * blksize + offset;
-        var cks = this.chunk(offset, blksize)
-        var end = start + cks;
-        var blob = file.slice(start, end);
-        Qiniu.chunks += cks; 
+
+        var cks = this.chunk(offset, blksize);
+        var blob = this.slice(file, Qiniu.chunks, cks);
 
         xhr.onreadystatechange = function(response) {
             if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
                 var blkRet = JSON.parse(xhr.responseText);
                 if (blkRet != null) {
-                    Qiniu.onProgress(Qiniu.chunks/file.size);
+                    Qiniu.chunks += cks;
+                    Qiniu.onProgress(Qiniu.chunks / file.size);
                     Qiniu.Progresses[blkIdex] = blkRet;
-                }
-                if (blkRet["offset"] < offset) {
-                    return
-                }
-                if (blkRet["offset"] < blksize) {
-                    Qiniu.putblk(file, blkIdex, blkRet["offset"], blksize, blkRet, blkCnt);
-                } else {
-                    Qiniu.onBlockPutFinished(file, blkIdex, blksize, blkCnt)
+                    if (blkRet["offset"] < blksize) {
+                        Qiniu.putblk(file, blkIdex, blkRet["offset"], blksize, blkRet, blkCnt);
+                    } else {
+                        Qiniu.onBlockPutFinished(file, blkIdex, blksize, blkCnt);
+                    }
                 }
             }
         }
         xhr.send(blob);
     },
 
-    chunkSize: 1024 * 256,
-
-    chunks: 0,
-
     resumbalePutBlock: function(file, blkIdex, blksize, blkCnt) {
-
         //...n-1,n,end ,up next block
         this.onBlockPutFinished = function(file, blkIdex, blksize, blkCnt) {
             if (blkIdex < blkCnt) {
-                console.log("resu=", blkIdex + 1)
                 this.resumbalePutBlock(file, ++blkIdex, this.getBlksize(file.size, blkIdex), blkCnt);
             } else {
                 Qiniu.mkfile(file, "icattlecoder3:sssss", file.size);
@@ -123,15 +193,13 @@ Qiniu = {
             this.putblk(file, blkIdex, offset, blksize, ret, blkCnt);
         };
         //1
-        this.mkblk(file, blkIdex, 0, blksize, blkCnt);
+        this.mkblk(file, blkIdex, blksize, blkCnt);
     },
 
     mkfile: function(file, key, fsize) {
 
-        body = "";
-
+        var body = "";
         var len = Qiniu.Progresses.length;
-
         for (var i = 0; i < len - 1; i++) {
             body += Qiniu.Progresses[i]["ctx"];
             body += ',';
@@ -141,31 +209,65 @@ Qiniu = {
         var url = this.UploadUrl + "/rs-mkfile/" + $.base64.encode(key) + "/fsize/" + fsize;
         url = url + "/mimeType/" + $.base64.encode(file.type);
         xhr.open('POST', url, true);
-        xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token());
+        xhr.setRequestHeader("Authorization", "UpToken " + Qiniu.token);
         xhr.onreadystatechange = function(response) {
             if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
                 var blkRet = JSON.parse(xhr.responseText);
-                // console.log(blkRet);
-                alert("上传成功")
+                console.log(xhr.responseText)
+                if (blkRet) {
+                    Qiniu.onPutFinished(fsize, blkRet);
+                }
             }
         }
         xhr.send(body);
     },
 
     Upload: function(key) {
+        if (!this.signUrl) {
+            this.onPutFailure("signUrl未指定");
+            return;
+        }
+        this.onUpToken = function(token) {
+            var f = this.files[0];
+            this.Progresses.length = 0;
+            this.chunks = 0;
+            var size = f.size;
+
+            this.onBeforeUp();
+
+            if (size < this.BLKSize) {
+                this.upload(f, key);
+            } else {
+                this.ResumbleUpload(f, key);
+            }
+
+            this.token = token;
+        }
+        this.ReqToken();
+    },
+
+    upload: function(f, key) {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', 'http://127.0.0.1:31010/', true);
         var formData, xhr;
         f = this.files[0];
         formData = new FormData();
-        formData.append('key', "ssjsuploadTests");
-        formData.append('token', Qiniu.token());
+        formData.append('key', "icattlecoder3:sssss");
+        formData.append('token', this.token);
         formData.append('file', f);
-
+        xhr.upload.addEventListener("progress", function(evt) {
+            if (evt.lengthComputable) {
+                var percentComplete = Math.round(evt.loaded * 100 / evt.total);
+                Qiniu.onProgress(percentComplete);
+            }
+        }, false);
         xhr.onreadystatechange = function(response) {
             if (xhr.readyState == 4 && xhr.status == 200) {
                 //checksum,crc32,ctx,host,offset
                 var blkRet = JSON.parse(xhr.responseText);
+                if (blkRet) {
+                    Qiniu.onPutFinished(blkRet);
+                }
             }
         };
         xhr.send(formData);
@@ -175,25 +277,19 @@ Qiniu = {
         return fsize > (blkIdex + 1) * this.BLKSize ? this.BLKSize : fsize - blkIdex * this.BLKSize;
     },
 
-    ResumbleUpload: function(key) {
-
-        f = this.files[0];
-
+    ResumbleUpload: function(f, key) {
         this.Progresses.length = 0;
-
         size = f.size;
-
-        blkCnt = this.blockCnt(size)
-
+        blkCnt = this.blockCnt(size);
         this.chunks = 0;
-
         this.resumbalePutBlock(f, 0, this.getBlksize(f.size, 0), blkCnt);
-    }
-}
-if (typeof FileReader == "undefined") {
-    alert("您的浏览器未实现FileReader接口！");
-}
+    },
 
+    fileSize: function(size) {
+        return (size / (1024 * 1024)).toFixed(2) + "MB";
+    }
+
+};
 
 //给jQuery提供访问FileList对象的功能
 jQuery.fn.files = function() {
@@ -201,203 +297,30 @@ jQuery.fn.files = function() {
 };
 
 
-
-
 //“显示文件信息”按钮的click事件代码
 $(function() {
+
+
     $("#upladBtn").click(function(event) {
+        Qiniu.signUrl = "http://7niu.sinaapp.com/index.php";
+        var progressbar = $("#progressbar");
+        var progressLabel = $(".progress-label");
+        Qiniu.onPutFailure = function(msg) {
+            alert(msg);
+        };
         Qiniu.onProgress = function(p) {
-            // $("txt_pro").val(p)
-            console.log("progress=",p)
-        }
+            p = p.toFixed(1);
+            progressbar.progressbar({
+                value: p * 100
+            });
+            progressLabel.text(progressbar.progressbar("value") + "%");
+        };
+        Qiniu.onPutFinished = function(fsize, res) {
+            progressLabel.text('上传成功!文件大小:' + Qiniu.fileSize(fsize));
+        };
         Qiniu.fileInput("#selectFiles");
-        Qiniu.ResumbleUpload("");
+        Qiniu.Upload("key");
 
         return;
-        var formData, xhr;
-
-        formData = new FormData();
-        formData.append('key', "jsuploadTest");
-        formData.append('token', Qiniu.token());
-
-        f = $("#selectFiles").files()[0];
-
-        alert(f.slice(0, 100));
-        return;
-
-        formData.append('file', $("#selectFiles").files()[0]);
-
-        xhr = new XMLHttpRequest();
-
-        xhr.open('POST', 'http://up.qiniu.com', true);
-        xhr.onreadystatechange = function(response) {};
-        xhr.send(formData);
-
-        return false;
-    });
-    $("#showInfoBtn").click(function(event) {
-        $("#clearBtn").click();
-        var fileObjs = $("#selectFiles").files();
-        var sum = 0,
-            count = 1;
-        var tbody = $("<tbody>");
-        for (var index = 0; index < fileObjs.length; index++) {
-            $("<tr>").append($("<td>").append("<meter>").val(count).text(count))
-                .append($("<td>").text(fileObjs[index].name))
-                .append($("<td>").text(fileObjs[index].type))
-                .append($("<td>").append($("<meter>").val(fileObjs[index].size).text(fileObjs[index].size / 1024)))
-                .append($("<td>").text(fileObjs[index].lastModifiedDate)).appendTo(tbody);
-            sum += fileObjs[index].size;
-            count++;
-        }
-        $("td>meter, #sum").attr("max", 5 * 1024 * 1024);
-        $("#info>thead").after(tbody);
-        $("#count").attr("max", "10").val(fileObjs.length).text(fileObjs.length);
-        $("#sum").val(sum).text(sum / 1024);
     });
 });
-
-
-
-
-$(function() {
-    $("#clearBtn").click(function(event) {
-        $("#info>tbody, #fileContent, #console").empty();
-        $("#count, #sum").val(0).text(0);
-    });
-});
-
-
-
-//三个按钮的click事件代码
-$(function() {
-    $("#txtBtn").click(function(event) {
-        //$("#selectFiles").files[0].si
-        // $("#selectFiles").readAsText(handler);
-        //$("#selectFiles").readAsText($("#selectFiles").files(),"UTF-8");
-    });
-
-    $("#binBtn").click(function(event) {
-        $("#selectFiles").readAsBinaryString(handler);
-    });
-
-    $("#urlBtn").click(function(event) {
-        $("#selectFiles").readAsDataURL(handler);
-    });
-});
-
-
-////////
-
-
-//传入的事件处理器函数代码
-var createTag = function(txt) {
-    $("#console").append($("<span>").text(txt).after("<br/>"));
-};
-
-var handler = {
-    load: function(event) {
-        createTag("this is FileReader's onload event.");
-        $("<p>").append(event.target.result).appendTo("#fileContent");
-    },
-    loadStart: function(event) {
-        createTag("this is FileReader's onloadstart event.");
-    },
-    loadEnd: function(event) {
-        createTag("this is FileReader's onloadend event.");
-    },
-    abort: function(event) {
-        createTag("this is FileReader's onabort event.");
-    },
-    error: function(event) {
-        createTag("this is FileReader's onerror event.");
-    },
-    progress: function(event) {
-        createTag("this is FileReader's onprogress event.");
-    }
-};
-
-
-var getFileReader = function(handler) {
-    var reader = new FileReader();
-    //var reader = FileReader(handler);
-
-    reader.onloadstart = handler.loadStart;
-    reader.onprogress = handler.progress;
-    reader.onload = handler.load;
-    reader.onloadend = handler.loadEnd;
-    reader.onabort = handler.abort;
-    reader.onerror = handler.error;
-    return reader;
-};
-
-
-////////////
-
-jQuery.fn.readAsText = function(handler, encoding) {
-    if (typeof encoding == "undefined") {
-        encoding = "UTF-8";
-    }
-    var files = this.files();
-
-    var reader = null;
-    for (var i = 0; i < files.length; i++) {
-
-
-        //alert(files[i].name);
-        reader = getFileReader(files[i]);
-
-
-        if (!/text\/\w+/.test(files[i].type)) {
-            reader.onload = createTag("Loading ..." + files[i].name);
-            reader.loadEnd = createTag("Loading have  End!" + files[i].name);
-        } else {
-            reader.onload = createTag("Loading ..." + files[i].name);
-            reader.readAsText(files[i], encoding);
-            alert(reader.result);
-            $("#fileContent").append($("<span>" + files[i].name + "<br>" + reader.result + "<br/>"));
-
-            reader.loadEnd = createTag("Loading have  End!" + files[i].name);
-        }
-
-    }
-    return this;
-};
-
-
-
-jQuery.fn.addText = function(txt) {
-    var createTag = function(txt) {
-        $("#console").append($("<span>").text(txt).after("<br/>"));
-    }
-};
-
-
-
-jQuery.fn.readAsBinaryString = function(handler) {
-    var files = this.files();
-    var reader = null;
-    for (var i = 0; i < files.length; i++) {
-        reader = getFileReader(handler);
-        reader.readAsBinaryString(files[i]);
-    }
-    return this;
-};
-
-jQuery.fn.readAsDataURL = function(handler) {
-    var files = this.files();
-    var reader = null;
-    var imageHandler = function(event) {
-        $("<img>").attr("src", event.target.result).appendTo("#fileContent");
-    };
-    for (var i = 0; i < files.length; i++) {
-        reader = getFileReader(handler);
-        if (!/image\/\w+/.test(files[i].type)) {
-            reader.readAsDataURL(files[i]);
-        } else {
-            reader.onload = imageHandler;
-            reader.readAsDataURL(files[i]);
-        }
-    }
-    return this;
-};
