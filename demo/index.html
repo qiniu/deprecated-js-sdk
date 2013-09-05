@@ -114,7 +114,7 @@
                 $(this).attr("data", "pause");
                 $(this).text("暂停")
                 Q.Histroy(true);
-                Q.SignUrl("http://7niu.sinaapp.com/index.php");
+                Q.SignUrl("index.php");
                 Q.addEvent("historyFound", function(his) {
                     if (confirm("文件：" + his + ",未上传完成，是否继续？")) {
                         Q.ResumbeHistory();

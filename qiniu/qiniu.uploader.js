@@ -206,6 +206,7 @@ if (typeof FileReader == "undefined") {
     alert("您的浏览器不支持Qiniu大文件上传！");
 
 }
+
 (function Qiniu() {
 
     var Qiniu_status = new Object();
@@ -220,7 +221,7 @@ if (typeof FileReader == "undefined") {
     var Qiniu_blockBits = 22;
     var Qiniu_blockMask = (1 << Qiniu_blockBits) - 1;
     var Qiniu_BLKSize = 4 * 1024 * 1024;
-    var Qiniu_chunkSize = 1024 * 512 * 4;
+    var Qiniu_chunkSize = 1024 * 512 ;
 
     //count
     var Qiniu_chunks = 0;
