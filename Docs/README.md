@@ -56,6 +56,7 @@ http://www.example.com/PutPolicy.php
 	<?php
     require_once("php-sdk/qiniu/rs.php");
     //七牛测试帐号，此帐号空间下的所有文件为临时文件，我们会进行定期的删除
+    //请不要上传您的重要数据至此空间
     $accessKey = 'iN7NgwM31j4-BZacMjPrOQBs34UG1maYCAQmhdCV';
     $secretKey = '6QTOr2Jg1gcZEWDQXKOGZh5PziC2MCV5KsntT70j';
     $bucket = "qtestbucket";
@@ -76,20 +77,20 @@ http://www.example.com/PutPolicy.php
 html页面
 
 ``` html
-    <script type="text/javascript">
+<script type="text/javascript">
 
-            //设置颁发token的Url,该Url返回的token用于后续的文件上传
-            Q.SignUrl("http://www.example.com/PutPolicy.php");
+    //设置颁发token的Url,该Url返回的token用于后续的文件上传
+    Q.SignUrl("http://www.example.com/PutPolicy.php");
             
-            //可以在此回调中添加提交至服务端的额外参数,用于生成上传token
-            //此函数会在上传前被调用
-            Q.addEvent("beforeUp", function() {
-                extra = new Object();
-                extra.key = Q.files()[0].name;
-                Q.SetPutExtra(JSON.stringify(extra));
-            });
-
-    </script>
+    //可以在此回调中添加提交至服务端的额外参数,用于生成上传token
+    //此函数会在上传前被调用
+    Q.addEvent("beforeUp", function() {
+        extra = new Object();
+        extra.key = Q.files()[0].name;
+        Q.SetPutExtra(JSON.stringify(extra));
+    });
+    
+</script>
 ```
 
 
@@ -105,7 +106,7 @@ js sdk提供以下三个事件用于通知用户上传结果
 5. historyFound //发现待发上传的文件是未完成的事件
 
 ``` html
-    <script type="text/javascript">
+<script type="text/javascript">
 
     //可以在此回调中添加提交至服务端的额外参数,用于生成上传token
     Q.addEvent("beforeUp", function() {});
@@ -129,7 +130,7 @@ js sdk提供以下三个事件用于通知用户上传结果
     //发现待发上传的文件是未完成的事件
     //@his,文件名
      Q.addEvent("historyFound", function(his) {});
-    </script>
+</script>
 ```
 
 在html页面中添加input type="file"控件，并将此控件的id设置给qiniu的js sdk,html页面源码如下：
@@ -177,7 +178,7 @@ ClearHistory(name)  | 清楚上传文件记录
 
 <a name=onlineDemo></a>
 ## 5. 在线示例
-[js-sdk在线演示示例](#http://7niu.sinaapp.com)
+[js-sdk在线演示示例](http://7niu.sinaapp.com)
 
 <a name=contribution></a>
 ## 6. 贡献代码
