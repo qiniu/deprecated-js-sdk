@@ -36,7 +36,7 @@ title: js SDK
 
 ``` html
 	<script type="text/javascript" src="jquery-1.9.1.min.js"></script><!-- * -->
-    <script type="text/javascript" src="qiniu.uploader.js?id=3"></script>
+    <script type="text/javascript" src="qiniu.uploader.js"></script>
 ```
 
 <a name=setup-key></a>
@@ -89,7 +89,7 @@ html页面
         extra.key = Q.files()[0].name;
         Q.SetPutExtra(JSON.stringify(extra));
     });
-    
+
 </script>
 ```
 
@@ -163,9 +163,9 @@ js sdk提供以下三个事件用于通知用户上传结果
 函数原型 | 说明
 ------------|---------
 Upload(key)  | 上传文件,key指定七牛云空间中的key
-Pasue  | 暂停上传 
-Resumble  | 继续上传 
-ResumbleHistory  | 续传历史文件
+Pasue()  | 暂停上传 
+Resumble()  | 继续上传 
+ResumbleHistory()  | 续传历史文件
 SignUrl(url)  | 设置获取Token的Url
 SetFileInput()  | 设置上传文件控件ID，如<input id="selectFiles"/>
 SignUrl(url)  | 设置获取Token的Url
