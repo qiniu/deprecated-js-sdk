@@ -8,7 +8,7 @@ title: js SDK
 2. 支持进度提示,实时速度提示
 3. Ajax无刷新
 4. 暂停,继续
-5. 历史记录，可在上传过程中关闭网页，下次打开网续传
+5. 历史记录，可在上传过程中关闭网页，下次打开网页续传
 
 目录
 ----
@@ -116,12 +116,11 @@ js sdk提供以下三个事件用于通知用户上传结果
     //@s, 已格式化的速度
     Q.addEvent("progress", function(p, s) {});
 
-    //上传完成回调
-
     //上传失败回调
     //@msg, 失败消息 
     Q.addEvent("putFailure", function(msg) {});
 
+    //上传完成回调
     //@fsize, 文件大小(MB)
     //@res, 上传返回结果，默认为{hash:<hash>,key:<key>}
     //@taking, 上传使用的时间
