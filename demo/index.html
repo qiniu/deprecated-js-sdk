@@ -4,19 +4,35 @@
 <head>
     <meta charset="utf-8" />
     <title>七牛云存储 | HTML5 大文件上传</title>
-    <link href="http://cdnjs.bootcss.com/ajax/libs/twitter-bootstrap/2.3.1/css/bootstrap.min.css" rel="stylesheet">
-    <link href="static/css/bootstrap-fileupload.min.css" rel="stylesheet">
-
+    <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">
     <style type="text/css">
+    thead {
+        background-color: #efefef;
+    }
     .wrap {
-        width:500px;
+        width:800px;
         margin: 0 auto;
         margin-top: 50px;
+        margin-bottom: 100px;
+    }
+    .fileupload {
+        /*width: 300px;*/
+        margin: 0 auto;
     }
     #progressbar {
         float: left;
         width:350px;
         height: 20px;
+    }
+    .progress {
+        width:300px;
+        margin-bottom: 0px;
+        overflow:scroll;
+    }
+    .toolBar {
+        width:500px;
+        margin: 0 auto;
+        margin-top: 50px;
     }
     .bar {
         text-align:left;
@@ -27,10 +43,61 @@
     li {
         list-style-type: none;
     }
-    #progressbarLabel {
+    .td_fname {
+        width: 250px;
+        height: 70px;
+    }
+    td {
+        vertical-align:middle;
+        border: 1px solid #ccc;
+        padding: 5px;
+    }
+    .pLabel {
         position: absolute;
-        width: 500px;
+        width: 300px;
         text-align: center;
+        color: black;
+    }
+    .alert {
+        position: fixed;
+        bottom: 0px;
+    }
+    * {
+        margin:0;
+        padding:0;
+    }
+    a {
+        text-decoration:none;
+    }
+    .btn_addPic {
+        display: block;
+        position: relative;
+        cursor: pointer;
+        text-align: center;
+    }
+    .btn_addPic span {
+        display: block;
+    }
+    .btn_addPic em {
+        display: inline-block;
+        width: 18px;
+        height: 18px;
+        overflow: hidden;
+        margin: 10px 5px 10px 0;
+        line-height: 20em;
+        vertical-align: middle;
+    }
+    .filePrew {
+        display: block;
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 400px;
+        height: 40px;
+        font-size: 100px;
+        /* 增大不同浏览器的可点击区域 */
+        opacity: 0;
+        /* 实现的关键点 */
     }
     </style>
 </head>
@@ -38,143 +105,230 @@
 <body>
     <header>
         <h3>七牛云存储 | HTML5 大文件上传</h3>
-        <ol>
-            <li>支持任意大小文件上传</li>
-            <li>支持断点上传</li>
-            <li>支持网页刷新重传</li>
-        </ol>
+        <hr>
+
     </header>
     <section>
-        <div class="wrap">
-            <form id="file-sample" name="file-sample">
-                <div class="fileupload fileupload-new" data-provides="fileupload">
-                    <div class="input-append">
-                        <div class="uneditable-input span3"><i class="icon-file fileupload-exists"></i> 
-                            <span class="fileupload-preview"></span>
-                        </div>
-                        <span class="btn btn-file">
-                            <span class="fileupload-new">选择文件</span>
-                            <span class="fileupload-exists">重选</span>
-                            <input type="file" id="selectFiles" title="选择文件上传至七牛">
-                        </span><a href="#" class="btn fileupload-exists" data-dismiss="fileupload">删除</a>
-                        <button type="button" class="btn" id="upladBtn" name="uploadBtn" data="start">上传</button>
-                    </div>
-                    <div id="div-result" class="alert alert-success alert-dismissable">
-                        上传结果将会显示在这里
-                    </div>
+        <div class="fileupload fileupload-new" style="width:400px" data-provides="fileupload">
+            <a href="javascript:void(0);" class="btn_addPic btn btn-default btn-lg">
+                <span>
+                    <i class="glyphicon glyphicon-plus"></i>
+                    添加文件(可同时选择多个文件)
+                </span>
+                <input id="selectFiles" multiple="multiple" size="3" name="pic" class="filePrew" type="file">
+            </a>
+        </div>
 
-                    <div class="progress progress-striped active">
-                        <div id="progressbar" class="bar" style="width: 0%;"></div>
-                        <div id="progressbarLabel"></div>
-                    </div>
-                </div>
-                <div class="alert alert-danger">注意:
-                    <br/>此示例上传的文件作为临时文件存储在七牛云存储空间中，我们会不定期的删除，请不要用于正式的应用</div>
-            </form>
+        <div class="wrap">
+            <div id="spdiv" class="input-group" style="display:none;">
+                <span class="input-group-addon">
+                    <span class="glyphicon glyphicon-home"></span>
+                </span>
+                <input id="txt_serverPath" type="text" class="form-control" placeholder="请输入服务端目录">
+            </div>
+
+            <div id="fileList">
+
+            </div>
+            <div class="alert alert-danger">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                注意: 此示例上传的文件作为临时文件存储在七牛云存储空间中，我们会不定期的删除，请不要用于正式的应用</div>
         </div>
     </section>
     <footer>
     </footer>
-    <script type="text/javascript" src="static/js/jquery-1.9.1.min.js"></script>
+    <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
+
     <!-- * -->
+
+    <script type="text/javascript" src="static/js/bootbox.js"></script>
     <!-- * -->
-    <script type="text/javascript" src="../qiniu/qiniu.uploader.js"></script>
-    <script type="text/javascript" src="static/js/bootstrap-fileupload.min.js"></script>
+    <script type="text/javascript" src="qiniu.uploader.js"></script>
+    <script src="//cdnjs.bootcss.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
+
+
+
+    <script src="static/js/bootstrap.js"></script>
     <script type="text/javascript">
     //“显示文件信息”按钮的click事件代码
     $(function() {
 
+
+        $("#rectButton").on("click", function() {
+            $.ajax({
+                type: "POST",
+                url: "login.php",
+                data: $("#accoutForm").serialize(), // serializes the form's elements.
+                success: function(data) {
+                    $('#myModal').modal('hide')
+                    $(".btn")[0].innerText = JSON.parse(data)["bucket"];
+                }
+            });
+
+            return false; // avoid to execute the actual submit of the form.
+        });
+
+        Q.Histroy(false);
+        Q.SignUrl("index.php");
+        Q.Bucket("qtestbucket");
+
         $("#selectFiles").change(function() {
-            $("#upladBtn").text("上传");
-            $("#upladBtn").attr("data", "start");
-            $("#progressbar").attr("style", "width: 0%")
-            $("#progressbarLabel").html("");
-            $("#div-result").html("上传结果将会显示在这里")
+
+            var files_arr = [];
+
             Q.Stop();
-        })
-        $("#upladBtn").click(function(event) {
 
-            //
-            if ($(this).attr("data") == "pause") {
+            files = document.getElementById("selectFiles").files;
+            if (files && files.length) {
+                $("#spdiv").show();
+                var pro = function(i) {
+                    return '<div class="progress"> <div id="progressbar' + i + '" class="progress-bar" role="progressbar" aria-valuenow="60" aria-valuemin="0" aria-valuemax="100" style="width: 0%;">  </div><div class="pLabel" id="progressbarLabel' + i + '"></div> </div>';
 
-                $(this).attr("data", "go-on");
-                $(this).text("继续");
-                Q.Pause();
-                return;
-            }
+                }
+                var tmp = '<table style="width:800px;margin-top:20px;">';
+                tmp += "<thead><tr><td>文件名称</td><td>文件大小</td><td>状态</td><td>操作</td></tr></thead><tbody>"
+                for (i = 0; i < files.length; i++) {
+                    files_arr.push(files[files.length - i - 1]);
+                    tmp += "<tr>";
+                    tmp += '<td class="td_fname">' + files[i].name + "</td><td>" + Q.fileSize(files[i].size) + "</td>";
+                    tmp += '<td id="td_' + i + '">' + pro(i) + '</td>';
+                    tmp += '<td><button data="' + i + '"" class="btn btn-warning btn_cancel">取消</button></td>';
+                    tmp += "</tr>"
+                }
+                tmp += '<td colspan="4" style="text-align:center;"><button id="btn_upload" state="start" class="btn_upload btn btn-default  btn-large btn-lg" ><span class="glyphicon glyphicon-cloud-upload"></span> 上  传 </button></td>'
+                tmp += "</tbody></table>"
 
-            if ($(this).attr("data") == "go-on") {
-                $(this).attr("data", "pause");
-                $(this).text("暂停")
-                Q.Resumbe();
-                return;
-            }
+                $("#fileList").html(tmp);
 
-            if ($(this).attr("data") == "start") {
-                $(this).attr("data", "pause");
-                $(this).text("暂停")
-                Q.Histroy(true);
-                Q.SignUrl("index.php");
-                Q.addEvent("historyFound", function(his) {
-                    if (confirm("文件：" + his + ",未上传完成，是否继续？")) {
-                        Q.ResumbeHistory();
-                    } else {
-                        Q.ClearHistory();
-                        Q.Upload(Q.files()[0].name);
+                $("#fileList .btn_cancel").on("click", function() {
+                    var i = $(this).attr("data");
+                    files_arr.splice(i, 1)
+                    Q.Stop();
+                    $(this).parent().parent().remove();
+                });
+
+                $("#btn_upload").on("click", function() {
+
+                    var idx = 0;
+
+                    if (Q.IsUploading()) {
+                        //alert("正在上传")
+                        //return
                     }
-                });
 
-                //可以在此回调中添加提交至服务端的额外参数,用于生成上传token
-                //putExtra会
-                Q.addEvent("beforeUp", function() {
-                    extra = new Object();
-                    extra.key = Q.files()[0].name;
-                    Q.SetPutExtra(JSON.stringify(extra));
-                });
 
-                //上传失败回调
-                Q.addEvent("putFailure", function(msg) {
-                    $("#upladBtn").text("上传");
-                    $("#upladBtn").attr("data", "start");
-                    alert(msg);
-                });
+                    if ($(this).attr("state") == "pause") {
 
-                //上传进度回调
-                // p:0~100
-                Q.addEvent("progress", function(p, s) {
-                    $("#progressbar").attr("style", "width: " + p + "%")
-                    $("#progressbarLabel").html(p + "%" + ", 速度: " + s);
-                });
+                        $(this).attr("state", "go-on");
+                        $(this).html('<span class="glyphicon glyphicon-play"></span>继续');
+                        Q.Pause();
+                        return;
+                    }
 
-                //上传完成回调
-                //fsize:文件大小(MB)
-                //res:上传返回结果，默认为{hash:<hash>,key:<key>}
-                Q.addEvent("putFinished", function(fsize, res, taking) {
-                    uploadSpeed = 1024 * fsize / (taking * 1000);
-                    if (uploadSpeed > 1024) {
-                        formatSpeed = (uploadSpeed / 1024).toFixed(2) + "Mb\/s";
-                    } else {
-                        formatSpeed = uploadSpeed.toFixed(2) + "Kb\/s";
-                    };
-                    $("#upladBtn").text("上传");
-                    $("#upladBtn").attr("data", "start");
-                    $("#div-result").html(
-                        '<strong>文件大小: </strong> ' + Q.fileSize(fsize) + "<br/>" +
-                        '<strong>文件地址: </strong> <a href="http://qtestbucket.qiniudn.com/' + res.key + '" >http://qtestbucket.qiniudn.com/' + res.key + '</a><br/>' +
-                        '<strong>Hash: </strong>' + res.hash
-                    )
+                    if ($(this).attr("state") == "go-on") {
+                        $(this).attr("state", "pause");
+                        $(this).html('<span class="glyphicon glyphicon-pause"></span>暂停');
+                        Q.Resume();
+                        return;
+                    }
+                    var getKey = function(subkey) {
+                        var d = $("#txt_serverPath").val();
+                        if (d == "") {
+                            return subkey;
+                        }
+                        var s = 0;
+                        while (d[s] == "/") {
+                            s++;
+                        }
+                        var e = d.length - 1;
+                        while (d[e] == "/") {
+                            e--;
+                        }
+                        d = d.substr(s, e - s + 1);
+                        return d + "/" + subkey;
+                    }
 
-                    $("#progressbar").attr("style", "width: 100%")
-                    $("#progressbarLabel").html("上传成功!平均速度:"+formatSpeed);
-                });
+                    if ($(this).attr("state") == "start") {
 
-                //指定上传文件的控件id
-                // <input type="file" name="selectFiles" id="selectFiles" multiple="multiple" />
-                Q.Bucket("qtestbucket");
-                Q.SetFileInput("selectFiles");
-                Q.Upload(Q.files()[0].name);
 
-                return;
+                        // Q.SignUrl("http://42.62.26.6/qiniu/index.php");
+
+                        Q.addEvent("historyFound", function(his) {
+                            if (confirm("文件：" + his + ",未上传完成，是否继续？")) {
+                                Q.ResumeHistory();
+                            } else {
+                                Q.ClearHistory();
+                                // var key = dir +"/"+Q.getFile().name;
+                                // Q.Upload(Q.getFile().name);
+                            }
+                        });
+
+                        //可以在此回调中添加提交至服务端的额外参数,用于生成上传token
+                        //putExtra会
+                        Q.addEvent("beforeUp", function() {
+                            extra = new Object();
+                            var key = getKey(Q.getFile().name);
+                            extra.key = key;
+                            console.log(JSON.stringify(extra));
+                            Q.SetPutExtra(JSON.stringify(extra));
+                        });
+
+                        //上传失败回调
+                        Q.addEvent("putFailure", function(msg) {
+                            $("#td_" + idx).html(
+                                '<strong>上传失败: </strong> ' + msg
+                            )
+                        });
+
+                        //上传进度回调
+                        // p:0~100
+                        Q.addEvent("progress", function(p, s) {
+                            $("#progressbar" + idx).attr("style", "width: " + p + "%")
+                            $("#progressbarLabel" + idx).text(p + "%" + ", 速度: " + s);
+                        });
+
+                        //上传完成回调
+                        //fsize:文件大小(MB)
+                        //res:上传返回结果，默认为{hash:<hash>,key:<key>}
+                        Q.addEvent("putFinished", function(fsize, res, taking) {
+                            uploadSpeed = 1024 * fsize / (taking * 1000);
+                            if (uploadSpeed > 1024) {
+                                formatSpeed = (uploadSpeed / 1024).toFixed(2) + "Mb\/s";
+                            } else {
+                                formatSpeed = uploadSpeed.toFixed(2) + "Kb\/s";
+                            };
+                            $("#btn_upload").attr("state", "start");
+                            $("#btn_upload").html('<span class="glyphicon glyphicon-cloud-upload"></span>上传');
+                            $("#td_" + idx).html(
+                                '<strong>文件地址: </strong> <a href="http://qtestbucket.qiniudn.com/' + res.key + '" target="_blank" >http://qtestbucket.qiniudn.com/' + res.key + '</a><br/>' +
+                                '<strong>Hash: </strong>' + res.hash
+                            )
+                            $("#progressbar" + idx).attr("style", "width: 100%")
+                            $("#progressbarLabel" + idx).html("上传成功!平均速度:" + formatSpeed);
+                            idx++;
+                            up();
+                        });
+
+
+                        var up = function() {
+                            console.log("up...")
+                            if (files_arr && files_arr.length) {
+                                var f = files_arr.pop();
+                                var key = getKey(f.name);
+                                $(this).attr("state", "pause");
+                                $(this).html('<span class="glyphicon glyphicon-pause"></span>暂停');
+                                console.log("uploading file:", f.name, " key:", key);
+                                Q.Upload(f, key);
+                            } else {
+                                bootbox.alert("所有文件上传完成！");
+                            }
+                        }
+                        up();
+                        return;
+                    }
+                })
+            } else {
+                $("#spdiv").hidden();
             }
         });
     });

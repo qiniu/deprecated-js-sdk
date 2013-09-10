@@ -209,11 +209,36 @@ if (typeof FileReader == "undefined") {
 
 (function Qiniu() {
 
+    /*******************
+     *DataBase Interface
+    var Qiniu_DB = (function DB() {
+        if(!Qiniu_historyTag){
+           return;
+        }
+        var _db;
+        var DBNAME = "QINIU_DB";
+        var request = window.indexedDB.open(DBNAME);
+        request.onerror = function(evt) {
+            return null;
+        };
+        request.onsuccess = function(evt) {
+            _db = request.result;
+        };
+        var AddProgress = function(key, p) {
+            var transaction = db.transaction(["progress" + key], "readwrite");
+            var oStore = transaction.objectStore("progress");
+            oStore.put(p);
+        }
+    })();
+    ********************/
+
     var Qiniu_status = new Object();
     var Qiniu_taking = 0;
     var Qiniu_key = null;
 
     var Qiniu_xhring = null;
+
+    var Qiniu_isUploading = false;
 
     /******************
      * Settings
@@ -221,7 +246,7 @@ if (typeof FileReader == "undefined") {
     var Qiniu_blockBits = 22;
     var Qiniu_blockMask = (1 << Qiniu_blockBits) - 1;
     var Qiniu_BLKSize = 4 * 1024 * 1024;
-    var Qiniu_chunkSize = 1024 * 512 ;
+    var Qiniu_chunkSize = 1024 * 512;
 
     //count
     var Qiniu_chunks = 0;
@@ -246,12 +271,7 @@ if (typeof FileReader == "undefined") {
 
     var Qiniu_UploadUrl = "http://up.qiniu.com";
 
-    var Qiniu_files = undefined;
-
-    //jquery based
-    var Qiniu_fileInput = function(_fileInput) {
-        Qiniu_files = document.getElementById(_fileInput).files;
-    };
+    var Qiniu_file = undefined;
 
     //请求上传凭证时附带的客户端参数，用于生成uptoken
     //如：提交自定义的表单
@@ -374,7 +394,7 @@ if (typeof FileReader == "undefined") {
     };
 
     var Qiniu_putblk = function(file, blkIdex, offset, blksize, preRet, blkCnt, r) {
-        if (preRet == null) {
+        if (preRet === null) {
             return;
         }
         Qiniu_status = {
@@ -470,11 +490,13 @@ if (typeof FileReader == "undefined") {
                         Qiniu_history = new Object();
                     }
                     if (events["putFinished"]) {
+                        Qiniu_isUploading = false;
                         fireEvent("putFinished")(fsize, blkRet, Qiniu_taking);
                     }
                 }
             } else if (xhr.status != 200 && xhr.responseText) {
                 if (events["putFailure"]) {
+                    Qiniu_isUploading = false;
                     fireEvent("putFailure")(xhr.responseText);
                 }
             }
@@ -482,22 +504,23 @@ if (typeof FileReader == "undefined") {
         xhr.send(body);
     };
 
-    var Qiniu_Upload = function(key) {
+    var Qiniu_Upload = function(file, key) {
 
         Qiniu_key = key;
-        if (Qiniu_files && Qiniu_files.length < 1) {
+        Qiniu_file = file;
+        if (!Qiniu_file) {
             if (events["putFailure"]) {
                 fireEvent("putFailure")("上传文件未指定");
             }
             return;
         }
 
-        var f = Qiniu_files[0];
+        var f = Qiniu_file;
         //============
         if (Qiniu_historyTag) {
             console.log("get cookie:", QINIU_HISTORY + f.name);
             Qiniu_history = Qiniu_Cookie.get(QINIU_HISTORY + f.name);
-            if (Qiniu_history && Qiniu_files[0].name == Qiniu_history.name) {
+            if (Qiniu_history && f.name == Qiniu_history.name) {
                 if (events["historyFound"]) {
                     fireEvent("historyFound")(Qiniu_history.name);
                 }
@@ -532,6 +555,7 @@ if (typeof FileReader == "undefined") {
             Qiniu_taking = 0;
             Qiniu_status = null;
             var size = f.size;
+            Qiniu_isUploading = true;
             if (size < Qiniu_BLKSize) {
                 Qiniu_upload(f, key);
             } else {
@@ -574,12 +598,12 @@ if (typeof FileReader == "undefined") {
     };
 
     //回复上传,需要cookie支持
-    var Qiniu_ResumbeHistory = function() {
+    var Qiniu_ResumeHistory = function() {
 
-        if (Qiniu_files.length < 1)
+        if (!Qiniu_file)
             return;
 
-        var f = Qiniu_files[0];
+        var f = Qiniu_file;
         if (Qiniu_historyTag) {
             Qiniu_history = Qiniu_Cookie.get(QINIU_HISTORY + f.name);
             if (!Qiniu_history) {
@@ -607,8 +631,8 @@ if (typeof FileReader == "undefined") {
         }
     };
 
-    var Qiniu_Resumbe = function() {
-        var f = Qiniu_files[0];
+    var Qiniu_Resume = function() {
+        var f = Qiniu_file;
         var blkCnt = Qiniu_blockCnt(f.size);
         Qiniu_resumbalePutBlock(f, Qiniu_status.blkIdex, Qiniu_getBlksize(f.size, Qiniu_status.blkIdex), blkCnt, Qiniu_key, true);
     };
@@ -624,7 +648,6 @@ if (typeof FileReader == "undefined") {
         var xhr = new XMLHttpRequest();
         xhr.open('POST', Qiniu_UploadUrl, true);
         var formData, startDate;
-        f = Qiniu_files[0];
         formData = new FormData();
         formData.append('key', key);
         formData.append('token', Qiniu_token);
@@ -658,9 +681,11 @@ if (typeof FileReader == "undefined") {
                 //checksum,crc32,ctx,host,offset
                 var blkRet = JSON.parse(xhr.responseText);
                 if (blkRet && events["putFinished"]) {
+                    Qiniu_isUploading = false;
                     fireEvent("putFinished")(f.size, blkRet, Qiniu_taking);
                 }
             } else if (xhr.status != 200 && xhr.responseText && events["putFailure"]) {
+                    Qiniu_isUploading = false;
                 fireEvent("putFailure")(xhr.responseText);
             }
         };
@@ -694,21 +719,20 @@ if (typeof FileReader == "undefined") {
         SignUrl: function(url) {
             Qiniu_signUrl = url;
         },
-        Resumbe: Qiniu_Resumbe,
-        ResumbeHistory: Qiniu_ResumbeHistory,
+        Resume: Qiniu_Resume,
+        ResumeHistory: Qiniu_ResumeHistory,
         Bucket: function(name) {
             Qiniu_bucket = name;
         },
-        SetFileInput: Qiniu_fileInput,
-        addEvent: addEvent,
-        files: function() {
-            return Qiniu_files;
+        getFile: function() {
+            return Qiniu_file;
         },
+        addEvent: addEvent,
         SetPutExtra: function(extra) {
             Qiniu_putExtra = extra;
         },
 
-        Histroy: function(his) {
+        History: function(his) {
 
             Qiniu_historyTag = his;
         },
@@ -716,7 +740,10 @@ if (typeof FileReader == "undefined") {
             Qiniu_history = null;
             Qiniu_Cookie.del(QINIU_HISTORY + name);
         },
-        fileSize: Qiniu_fileSize
+        fileSize: Qiniu_fileSize,
+        IsUploading:function() {
+            return Qiniu_isUploading;
+        }
     };
 
 })();

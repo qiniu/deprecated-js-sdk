@@ -30,7 +30,7 @@ title: js SDK
 
 引用:
 	
-	在Html 文件中引入`jquery-1.9.1.min.js`,`qiniu.uploader.js` 三个文件。
+	在Html 文件中引入`jquery-1.9.1.min.js`,`qiniu.uploader.js` 两个文件。
 
 示例：
 
@@ -86,7 +86,7 @@ html页面
     //此函数会在上传前被调用
     Q.addEvent("beforeUp", function() {
         extra = new Object();
-        extra.key = Q.files()[0].name;
+        extra.key = "key";
         Q.SetPutExtra(JSON.stringify(extra));
     });
 
@@ -107,8 +107,8 @@ js sdk提供以下三个事件用于通知用户上传结果
 
 ``` html
 <script type="text/javascript">
-
-    //可以在此回调中添加提交至服务端的额外参数,用于生成上传token
+    //此事件在请求服务端获取token前被调用
+    //因此，可以在此事件中添加提交至服务端的额外参数,用于生成上传token
     Q.addEvent("beforeUp", function() {});
 
     //上传进度回调
@@ -132,7 +132,7 @@ js sdk提供以下三个事件用于通知用户上传结果
 </script>
 ```
 
-在html页面中添加input type="file"控件，并将此控件的id设置给qiniu的js sdk,html页面源码如下：
+在html页面中添加input type="file"控件，html页面源码如下：
 
 ``` html
 <!DOCTYPE html>
@@ -146,11 +146,23 @@ js sdk提供以下三个事件用于通知用户上传结果
     <script type="text/javascript" src="jquery-1.9.1.min.js"></script><!-- * -->
     <script type="text/javascript" src="qiniu.uploader.js?id=3"></script>
     <script type="text/javascript">
-     $("#upladBtn").click(function(event) {
+    //设置颁发token的Url,该Url返回的token用于后续的文件上传
+    Q.SignUrl("http://www.example.com/PutPolicy.php");
+    
+    Q.addEvent("beforeUp", function() {
+        extra = new Object();
+        extra.key = "key";
+        Q.SetPutExtra(JSON.stringify(extra));
+    });
+
+    $("#upladBtn").click(function(event) {
         //在调用 Upload之前，设置所有的事件
-        Q.fileInput("#selectFiles");
+        var files = document.getElementById('selectFiles')
         //上传文件 
-        Q.Upload("key");
+        if(files&&files.length){
+            var f = files[0];
+            Q.Upload(f,f.name);
+        }
     }
     </script>
 </body>
@@ -161,19 +173,18 @@ js sdk提供以下三个事件用于通知用户上传结果
 ## 4. 接口说明
 函数原型 | 说明
 ------------|---------
-Upload(key)  | 上传文件,key指定七牛云空间中的key
+Upload(file,key)  | 上传文件,file为需要上传的文件，key指定七牛云空间中的key
+Stop()  | 停止上传。 
 Pasue()  | 暂停上传 
-Resumble()  | 继续上传 
-ResumbleHistory()  | 续传历史文件
-SignUrl(url)  | 设置获取Token的Url
-SetFileInput()  | 设置上传文件控件ID，如<input id="selectFiles"/>
+Resume()  | 继续上传 
+ResumeHistory()  | 续传历史文件
 SignUrl(url)  | 设置获取Token的Url
 Bucket(name)  | 设置上传至Qiniu云存储空间名
 addEvent(type,fn)  | 回调事件,参考[上传文件](#api-io)
-files  | 已选择的文件
+getFile()  | 获取当前正在上传的文件
 setPutExtra(extra)  | 设置获取token的额外参数
-Histroy(his)  | his=true,启用上传文件记录，当网页关闭再次上传同一个文件时，会触发historyFound事件
-ClearHistory(name)  | 清楚上传文件记录
+History(his)  | his=true,启用上传文件记录，当网页关闭再次上传同一个文件时，会触发historyFound事件
+ClearHistory(name)  | 清除上传文件记录
 
 <a name=onlineDemo></a>
 ## 5. 在线示例
