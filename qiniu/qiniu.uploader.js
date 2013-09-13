@@ -70,17 +70,11 @@ function utf8to16(str) {
     return out;
 }
 
-/* Copyright (C) 1999 Masanao Izumo <iz@onicos.co.jp>
- * Version: 1.0
- * LastModified: Dec 25 1999
- * This library is free. You can redistribute it and/or modify it.
- */
 /*
  * Interfaces:
  * b64 = base64encode(data);
  * data = base64decode(b64);
  */
-
 var base64EncodeChars = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789-_";
 var base64DecodeChars = new Array(-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 62, -1, -1, -1, 63,
     52, 53, 54, 55, 56, 57, 58, 59, 60, 61, -1, -1, -1, -1, -1, -1, -1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
@@ -162,6 +156,46 @@ function base64decode(str) {
     return out;
 }
 
+
+/*  
+===============================================================================
+Crc32 is a JavaScript function for computing the CRC32 of a string
+...............................................................................
+
+Version: 1.2 - 2006/11 - http://noteslog.com/category/javascript/
+
+-------------------------------------------------------------------------------
+Copyright (c) 2006 Andrea Ercolino      
+http://www.opensource.org/licenses/mit-license.php
+===============================================================================
+*/
+(function() {
+    var strTable = "00000000 77073096 EE0E612C 990951BA 076DC419 706AF48F E963A535 9E6495A3 0EDB8832 79DCB8A4 E0D5E91E 97D2D988 09B64C2B 7EB17CBD E7B82D07 90BF1D91 1DB71064 6AB020F2 F3B97148 84BE41DE 1ADAD47D 6DDDE4EB F4D4B551 83D385C7 136C9856 646BA8C0 FD62F97A 8A65C9EC 14015C4F 63066CD9 FA0F3D63 8D080DF5 3B6E20C8 4C69105E D56041E4 A2677172 3C03E4D1 4B04D447 D20D85FD A50AB56B 35B5A8FA 42B2986C DBBBC9D6 ACBCF940 32D86CE3 45DF5C75 DCD60DCF ABD13D59 26D930AC 51DE003A C8D75180 BFD06116 21B4F4B5 56B3C423 CFBA9599 B8BDA50F 2802B89E 5F058808 C60CD9B2 B10BE924 2F6F7C87 58684C11 C1611DAB B6662D3D 76DC4190 01DB7106 98D220BC EFD5102A 71B18589 06B6B51F 9FBFE4A5 E8B8D433 7807C9A2 0F00F934 9609A88E E10E9818 7F6A0DBB 086D3D2D 91646C97 E6635C01 6B6B51F4 1C6C6162 856530D8 F262004E 6C0695ED 1B01A57B 8208F4C1 F50FC457 65B0D9C6 12B7E950 8BBEB8EA FCB9887C 62DD1DDF 15DA2D49 8CD37CF3 FBD44C65 4DB26158 3AB551CE A3BC0074 D4BB30E2 4ADFA541 3DD895D7 A4D1C46D D3D6F4FB 4369E96A 346ED9FC AD678846 DA60B8D0 44042D73 33031DE5 AA0A4C5F DD0D7CC9 5005713C 270241AA BE0B1010 C90C2086 5768B525 206F85B3 B966D409 CE61E49F 5EDEF90E 29D9C998 B0D09822 C7D7A8B4 59B33D17 2EB40D81 B7BD5C3B C0BA6CAD EDB88320 9ABFB3B6 03B6E20C 74B1D29A EAD54739 9DD277AF 04DB2615 73DC1683 E3630B12 94643B84 0D6D6A3E 7A6A5AA8 E40ECF0B 9309FF9D 0A00AE27 7D079EB1 F00F9344 8708A3D2 1E01F268 6906C2FE F762575D 806567CB 196C3671 6E6B06E7 FED41B76 89D32BE0 10DA7A5A 67DD4ACC F9B9DF6F 8EBEEFF9 17B7BE43 60B08ED5 D6D6A3E8 A1D1937E 38D8C2C4 4FDFF252 D1BB67F1 A6BC5767 3FB506DD 48B2364B D80D2BDA AF0A1B4C 36034AF6 41047A60 DF60EFC3 A867DF55 316E8EEF 4669BE79 CB61B38C BC66831A 256FD2A0 5268E236 CC0C7795 BB0B4703 220216B9 5505262F C5BA3BBE B2BD0B28 2BB45A92 5CB36A04 C2D7FFA7 B5D0CF31 2CD99E8B 5BDEAE1D 9B64C2B0 EC63F226 756AA39C 026D930A 9C0906A9 EB0E363F 72076785 05005713 95BF4A82 E2B87A14 7BB12BAE 0CB61B38 92D28E9B E5D5BE0D 7CDCEFB7 0BDBDF21 86D3D2D4 F1D4E242 68DDB3F8 1FDA836E 81BE16CD F6B9265B 6FB077E1 18B74777 88085AE6 FF0F6A70 66063BCA 11010B5C 8F659EFF F862AE69 616BFFD3 166CCF45 A00AE278 D70DD2EE 4E048354 3903B3C2 A7672661 D06016F7 4969474D 3E6E77DB AED16A4A D9D65ADC 40DF0B66 37D83BF0 A9BCAE53 DEBB9EC5 47B2CF7F 30B5FFE9 BDBDF21C CABAC28A 53B39330 24B4A3A6 BAD03605 CDD70693 54DE5729 23D967BF B3667A2E C4614AB8 5D681B02 2A6F2B94 B40BBE37 C30C8EA1 5A05DF1B 2D02EF8D".split(' ');
+
+    var table = new Array();
+    for (var i = 0; i < strTable.length; ++i) {
+        table[i] = parseInt("0x" + strTable[i]);
+    }
+
+    /* Number */
+    crc32 = function( /* String */ str, /* Number */ crc) {
+        if (crc == window.undefined) crc = 0;
+        var n = 0; //a number between 0 and 255
+        var x = 0; //an hex number
+        crc = crc ^ (-1);
+        for (var i = 0, iTop = str.length; i < iTop; i++) {
+            n = (crc ^ str.charCodeAt(i)) & 0xFF;
+            crc = (crc >>> 8) ^ table[n];
+        }
+        var number = crc ^ (-1);
+        if (number < 0) {
+            number = 0xFFFFFFFF + number + 1;
+        }
+        return number;
+
+    };
+})();
+
 var Qiniu_Cookie = {
     set: function(name, value) {
         value = JSON.stringify(value);
@@ -211,26 +245,33 @@ if (typeof FileReader == "undefined") {
 
     /*******************
      *DataBase Interface
+     ********************/
     var Qiniu_DB = (function DB() {
-        if(!Qiniu_historyTag){
-           return;
+
+        if (!Qiniu_historyTag) {
+            return;
         }
+
         var _db;
+
         var DBNAME = "QINIU_DB";
         var request = window.indexedDB.open(DBNAME);
+
         request.onerror = function(evt) {
             return null;
         };
+
         request.onsuccess = function(evt) {
             _db = request.result;
         };
+
         var AddProgress = function(key, p) {
             var transaction = db.transaction(["progress" + key], "readwrite");
             var oStore = transaction.objectStore("progress");
             oStore.put(p);
-        }
+        };
+
     })();
-    ********************/
 
     var Qiniu_status = new Object();
     var Qiniu_taking = 0;
@@ -240,13 +281,15 @@ if (typeof FileReader == "undefined") {
 
     var Qiniu_isUploading = false;
 
+    var Qiniu_retryTimes = 3;
+
     /******************
      * Settings
      ******************/
     var Qiniu_blockBits = 22;
     var Qiniu_blockMask = (1 << Qiniu_blockBits) - 1;
     var Qiniu_BLKSize = 4 * 1024 * 1024;
-    var Qiniu_chunkSize = 1024 * 512;
+    var Qiniu_chunkSize = 1024 * 1024;
 
     //count
     var Qiniu_chunks = 0;
@@ -269,6 +312,7 @@ if (typeof FileReader == "undefined") {
 
     var Qiniu_Progresses = [];
 
+    // var Qiniu_UploadUrl = "http://127.0.0.1:31010";
     var Qiniu_UploadUrl = "http://up.qiniu.com";
 
     var Qiniu_file = undefined;
@@ -296,6 +340,20 @@ if (typeof FileReader == "undefined") {
         }
         xhr.send(formData);
         Qiniu_xhring = xhr;
+    };
+
+    var Qiniu_CRC = function(blob, fun) {
+        var _reader = new FileReader();
+        _reader.onloadend = function(evt) {
+            if (evt.target.readyState == FileReader.DONE) { // DONE == 2
+                var crc = crc32(evt.target.result);
+                fun(crc);
+            }
+        };
+        _reader.onerror = function(evt) {
+            alert("Error: " + evt.target.error.code);
+        };
+        _reader.readAsBinaryString(blob);
     };
 
     //读取文件切片
@@ -334,7 +392,11 @@ if (typeof FileReader == "undefined") {
 
     //============================================================
 
-    var Qiniu_mkblk = function(file, blkIdex, blksize, blkCnt, r) {
+    var Qiniu_mkblk = function(file, blkIdex, blksize, blkCnt, r, retry) {
+        if (!retry) {
+            console.log("mkblk failded!retry = 0");
+            return;
+        }
         Qiniu_status = {
             file: file,
             blkIdex: blkIdex,
@@ -344,56 +406,76 @@ if (typeof FileReader == "undefined") {
             mkblk: false,
             blkCnt: blkCnt
         };
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', Qiniu_UploadUrl + "/mkblk/" + blksize, true);
-        xhr.setRequestHeader("Authorization", "UpToken " + Qiniu_token);
 
         var cks = Qiniu_chunk(0, blksize);
         var blob = Qiniu_slice(file, Qiniu_chunks, cks);
         var startDate;
 
-        xhr.upload.addEventListener("progress", function(evt) {
-            if (evt.lengthComputable) {
-                var nowDate = new Date().getTime();
-                //计算网速
-                var x = (evt.loaded) / 1024;
-                var y = (nowDate - startDate) / 1000;
-                var uploadSpeed = (x / y);
-                var formatSpeed;
-                if (uploadSpeed > 1024) {
-                    formatSpeed = (uploadSpeed / 1024).toFixed(2) + "Mb\/s";
+        Qiniu_CRC(blob, function(crc) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', Qiniu_UploadUrl + "/mkblk/" + blksize, true);
+            xhr.setRequestHeader("Authorization", "UpToken " + Qiniu_token);
+            xhr.upload.addEventListener("progress", function(evt) {
+                if (evt.lengthComputable) {
+                    var nowDate = new Date().getTime();
+                    //计算网速
+                    var x = (evt.loaded) / 1024;
+                    var y = (nowDate - startDate) / 1000;
+                    var uploadSpeed = (x / y);
+                    var formatSpeed;
+                    if (uploadSpeed > 1024) {
+                        formatSpeed = (uploadSpeed / 1024).toFixed(2) + "Mb\/s";
+                    } else {
+                        formatSpeed = uploadSpeed.toFixed(2) + "Kb\/s";
+                    }
+                    var tmp = Qiniu_chunks + evt.loaded;
+                    var percentComplete = Math.round(100 * tmp / file.size);
+                    if (events["progress"]) {
+                        fireEvent("progress")(percentComplete, formatSpeed);
+                    }
+                }
+            }, false);
+            xhr.upload.onerror = function(evt) {
+                if (--retry == 0) { //failure
+
                 } else {
-                    formatSpeed = uploadSpeed.toFixed(2) + "Kb\/s";
+                    console.log("mkblk failded,retyr = ", retry);
+                    Qiniu_mkblk(file, blkIdex, blksize, blkCnt, r, retry);
                 }
-
-                var tmp = Qiniu_chunks + evt.loaded;
-                var percentComplete = Math.round(100 * tmp / file.size);
-                if (events["progress"]) {
-                    fireEvent("progress")(percentComplete, formatSpeed);
+            };
+            xhr.onreadystatechange = function(response) {
+                if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
+                    var nowDate = new Date().getTime();
+                    Qiniu_taking += (nowDate - startDate);
+                    var blkRet = JSON.parse(xhr.responseText);
+                    if (blkRet) {
+                        if (blkRet["crc32"] != crc) {
+                            if (--retry == 0) {
+                                if (events["putFailure"]) {
+                                    Qiniu_isUploading = false;
+                                    fireEvent("putFailure")(xhr.responseText);
+                                }
+                            } else {
+                                console.log("mkblk failded,retyr = ", retry);
+                                Qiniu_mkblk(file, blkIdex, blksize, blkCnt, r, retry);
+                            }
+                        } else {
+                            Qiniu_chunks += cks;
+                            Qiniu_Progresses[blkIdex] = blkRet;
+                            Qiniu_status.mkblk = true;
+                            Qiniu_status.preRet = blkRet;
+                            Qiniu_onMkblkFinished(blkRet, file, blkIdex, blkRet["offset"], blksize, blkCnt);
+                        }
+                    }
                 }
-            }
-        }, false);
-
-        xhr.onreadystatechange = function(response) {
-            if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
-                var nowDate = new Date().getTime();
-                Qiniu_taking += (nowDate - startDate);
-                var blkRet = JSON.parse(xhr.responseText);
-                if (blkRet) {
-                    Qiniu_chunks += cks;
-                    Qiniu_Progresses[blkIdex] = blkRet;
-                    Qiniu_status.mkblk = true;
-                    Qiniu_status.preRet = blkRet;
-                    Qiniu_onMkblkFinished(blkRet, file, blkIdex, blkRet["offset"], blksize, blkCnt);
-                }
-            }
-        };
-        startDate = new Date().getTime();
-        xhr.send(blob);
-        Qiniu_xhring = xhr;
+            };
+            startDate = new Date().getTime();
+            xhr.send(blob);
+            Qiniu_xhring = xhr;
+        });
     };
 
-    var Qiniu_putblk = function(file, blkIdex, offset, blksize, preRet, blkCnt, r) {
+    var Qiniu_putblk = function(file, blkIdex, offset, blksize, preRet, blkCnt, r, retry) {
         if (preRet === null) {
             return;
         }
@@ -406,63 +488,81 @@ if (typeof FileReader == "undefined") {
             mkblk: true,
             blkCnt: blkCnt
         };
-
         if (file.size == Qiniu_chunks) {
             Qiniu_onBlockPutFinished(file, blkIdex, blksize, blkCnt);
             return;
         }
-        var startDate;
-        var xhr = new XMLHttpRequest();
-        xhr.open('POST', preRet["host"] + "/bput/" + preRet["ctx"] + "/" + offset, true);
-        xhr.setRequestHeader("Authorization", "UpToken " + Qiniu_token);
-
         var cks = Qiniu_chunk(offset, blksize);
         var blob = Qiniu_slice(file, Qiniu_chunks, cks);
-
-        xhr.upload.addEventListener("progress", function(evt) {
-            if (evt.lengthComputable) {
-                var nowDate = new Date().getTime();
-                var x = (evt.loaded) / 1024;
-                var y = (nowDate - startDate) / 1000;
-                var uploadSpeed = (x / y);
-                var formatSpeed;
-                if (uploadSpeed > 1024) {
-                    formatSpeed = (uploadSpeed / 1024).toFixed(2) + "Mb\/s";
-                } else {
-                    formatSpeed = uploadSpeed.toFixed(2) + "Kb\/s";
-                }
-                var tmp = Qiniu_chunks + evt.loaded;
-                var percentComplete = Math.round(100 * tmp / file.size);
-                if (!r) {
-                    if (events["progress"]) {
-                        fireEvent("progress")(percentComplete, formatSpeed);
-                    }
-                }
-            }
-        }, false);
-
-        xhr.onreadystatechange = function(response) {
-            if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
-
-                var blkRet = JSON.parse(xhr.responseText);
-                if (blkRet != null) {
+        var startDate;
+        Qiniu_CRC(blob, function(crc) {
+            var xhr = new XMLHttpRequest();
+            xhr.open('POST', preRet["host"] + "/bput/" + preRet["ctx"] + "/" + offset, true);
+            xhr.setRequestHeader("Authorization", "UpToken " + Qiniu_token);
+            xhr.upload.addEventListener("progress", function(evt) {
+                if (evt.lengthComputable) {
                     var nowDate = new Date().getTime();
-                    Qiniu_taking += (nowDate - startDate);
-                    Qiniu_chunks += cks;
-                    Qiniu_Progresses[blkIdex] = blkRet;
-                    Qiniu_status.preRet = blkRet;
-                    if (blkRet["offset"] < blksize) {
-                        Qiniu_putblk(file, blkIdex, blkRet["offset"], blksize, blkRet, blkCnt);
+                    var x = (evt.loaded) / 1024;
+                    var y = (nowDate - startDate) / 1000;
+                    var uploadSpeed = (x / y);
+                    var formatSpeed;
+                    if (uploadSpeed > 1024) {
+                        formatSpeed = (uploadSpeed / 1024).toFixed(2) + "Mb\/s";
                     } else {
-                        Qiniu_onBlockPutFinished(file, blkIdex, blksize, blkCnt);
+                        formatSpeed = uploadSpeed.toFixed(2) + "Kb\/s";
+                    }
+                    var tmp = Qiniu_chunks + evt.loaded;
+                    var percentComplete = Math.round(100 * tmp / file.size);
+                    if (!r) {
+                        if (events["progress"]) {
+                            fireEvent("progress")(percentComplete, formatSpeed);
+                        }
                     }
                 }
-            }
-        };
-
-        startDate = new Date().getTime();
-        xhr.send(blob);
-        Qiniu_xhring = xhr;
+            }, false);
+            xhr.upload.onerror = function(evt) {
+                if (--retry == 0) { //failure
+                    if (events["putFailure"]) {
+                        Qiniu_isUploading = false;
+                        fireEvent("putFailure")(xhr.responseText);
+                    }
+                } else {
+                    console.log("onerror, mkblk failded,retyr = ", retry);
+                    Qiniu_putblk(file, blkIdex, offset, blksize, preRet, blkCnt, r, retry);
+                }
+            };
+            xhr.onreadystatechange = function(response) {
+                if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
+                    var blkRet = JSON.parse(xhr.responseText);
+                    if (blkRet != null) {
+                        if (blkRet["crc32"] != crc) {
+                            if (--retry == 0) { //failure
+                                if (events["putFailure"]) {
+                                    Qiniu_isUploading = false;
+                                    fireEvent("putFailure")(xhr.responseText);
+                                }
+                            } else {
+                                Qiniu_putblk(file, blkIdex, offset, blksize, preRet, blkCnt, r, retry);
+                            }
+                        } else {
+                            var nowDate = new Date().getTime();
+                            Qiniu_taking += (nowDate - startDate);
+                            Qiniu_chunks += cks;
+                            Qiniu_Progresses[blkIdex] = blkRet;
+                            Qiniu_status.preRet = blkRet;
+                            if (blkRet["offset"] < blksize) {
+                                Qiniu_putblk(file, blkIdex, blkRet["offset"], blksize, blkRet, blkCnt, false, Qiniu_retryTimes);
+                            } else {
+                                Qiniu_onBlockPutFinished(file, blkIdex, blksize, blkCnt);
+                            }
+                        }
+                    }
+                }
+            };
+            startDate = new Date().getTime();
+            xhr.send(blob);
+            Qiniu_xhring = xhr;
+        });
     };
 
     var Qiniu_mkfile = function(file, key, fsize) {
@@ -587,13 +687,13 @@ if (typeof FileReader == "undefined") {
         };
         Qiniu_onMkblkFinished = function(ret, file, blkIdex, offset, blksize, blkCnt) {
             //2,3,4,5,...,
-            Qiniu_putblk(file, blkIdex, offset, blksize, ret, blkCnt);
+            Qiniu_putblk(file, blkIdex, offset, blksize, ret, blkCnt, Qiniu_retryTimes);
         };
         //1
         if (r && Qiniu_status.mkblk) {
-            Qiniu_putblk(file, blkIdex, Qiniu_status.offset, blksize, Qiniu_status.preRet, blkCnt, r);
+            Qiniu_putblk(file, blkIdex, Qiniu_status.offset, blksize, Qiniu_status.preRet, blkCnt, r, Qiniu_retryTimes);
         } else {
-            Qiniu_mkblk(file, blkIdex, blksize, blkCnt, r);
+            Qiniu_mkblk(file, blkIdex, blksize, blkCnt, r, Qiniu_retryTimes);
         }
     };
 
@@ -685,7 +785,7 @@ if (typeof FileReader == "undefined") {
                     fireEvent("putFinished")(f.size, blkRet, Qiniu_taking);
                 }
             } else if (xhr.status != 200 && xhr.responseText && events["putFailure"]) {
-                    Qiniu_isUploading = false;
+                Qiniu_isUploading = false;
                 fireEvent("putFailure")(xhr.responseText);
             }
         };
@@ -731,8 +831,7 @@ if (typeof FileReader == "undefined") {
         SetPutExtra: function(extra) {
             Qiniu_putExtra = extra;
         },
-
-        History: function(his) {
+        Histroy: function(his) {
 
             Qiniu_historyTag = his;
         },
@@ -741,9 +840,8 @@ if (typeof FileReader == "undefined") {
             Qiniu_Cookie.del(QINIU_HISTORY + name);
         },
         fileSize: Qiniu_fileSize,
-        IsUploading:function() {
+        IsUploading: function() {
             return Qiniu_isUploading;
         }
     };
-
 })();
