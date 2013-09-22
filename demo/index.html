@@ -25,7 +25,7 @@
         height: 20px;
     }
     .progress {
-        width:300px;
+        /*width:300px;*/
         margin-bottom: 0px;
         overflow:scroll;
     }
@@ -99,17 +99,20 @@
         opacity: 0;
         /* 实现的关键点 */
     }
+    .td_pro {
+        width: 400px;
+    }
     </style>
 </head>
 
 <body>
     <header>
-        <h3>七牛云存储 | HTML5 大文件上传</h3>
+        <h3>七牛云存储</h3>
         <hr>
 
     </header>
     <section>
-        <div class="fileupload fileupload-new" style="width:400px" data-provides="fileupload">
+        <div class="fileupload fileupload-new" style="width:300px" data-provides="fileupload">
             <a href="javascript:void(0);" class="btn_addPic btn btn-default btn-lg">
                 <span>
                     <i class="glyphicon glyphicon-plus"></i>
@@ -130,20 +133,17 @@
             <div id="fileList">
 
             </div>
-            <div class="alert alert-danger">
-                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-                注意: 此示例上传的文件作为临时文件存储在七牛云存储空间中，我们会不定期的删除，请不要用于正式的应用</div>
+
         </div>
     </section>
     <footer>
     </footer>
     <script type="text/javascript" src="//ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script>
 
-    <!-- * -->
-
     <script type="text/javascript" src="static/js/bootbox.js"></script>
     <!-- * -->
     <script type="text/javascript" src="qiniu.uploader.js"></script>
+    <script type="text/javascript" src="static/js/bootstrap-fileupload.min.js"></script>
     <script src="//cdnjs.bootcss.com/ajax/libs/twitter-bootstrap/2.3.1/js/bootstrap.min.js"></script>
 
 
@@ -153,30 +153,19 @@
     //“显示文件信息”按钮的click事件代码
     $(function() {
 
-
-        $("#rectButton").on("click", function() {
-            $.ajax({
-                type: "POST",
-                url: "login.php",
-                data: $("#accoutForm").serialize(), // serializes the form's elements.
-                success: function(data) {
-                    $('#myModal').modal('hide')
-                    $(".btn")[0].innerText = JSON.parse(data)["bucket"];
-                }
-            });
-
-            return false; // avoid to execute the actual submit of the form.
-        });
-
+        var Bucket = "qtestbucket";
         Q.Histroy(false);
-        Q.SignUrl("index.php");
-        Q.Bucket("qtestbucket");
+        Q.SignUrl("token.php");
+        Q.Bucket(Bucket);
 
         $("#selectFiles").change(function() {
+
+            $("#btn_upload").prop("disabled", false)
 
             var files_arr = [];
 
             Q.Stop();
+            var idx = 0;
 
             files = document.getElementById("selectFiles").files;
             if (files && files.length) {
@@ -186,13 +175,12 @@
 
                 }
                 var tmp = '<table style="width:800px;margin-top:20px;">';
-                tmp += "<thead><tr><td>文件名称</td><td>文件大小</td><td>状态</td><td>操作</td></tr></thead><tbody>"
+                tmp += "<thead><tr><td>文件名称</td><td>文件大小</td><td>状态</td></tr></thead><tbody>"
                 for (i = 0; i < files.length; i++) {
                     files_arr.push(files[files.length - i - 1]);
                     tmp += "<tr>";
                     tmp += '<td class="td_fname">' + files[i].name + "</td><td>" + Q.fileSize(files[i].size) + "</td>";
-                    tmp += '<td id="td_' + i + '">' + pro(i) + '</td>';
-                    tmp += '<td><button data="' + i + '"" class="btn btn-warning btn_cancel">取消</button></td>';
+                    tmp += '<td class="td_pro" id="td_' + i + '">' + pro(i) + '</td>';
                     tmp += "</tr>"
                 }
                 tmp += '<td colspan="4" style="text-align:center;"><button id="btn_upload" state="start" class="btn_upload btn btn-default  btn-large btn-lg" ><span class="glyphicon glyphicon-cloud-upload"></span> 上  传 </button></td>'
@@ -200,22 +188,12 @@
 
                 $("#fileList").html(tmp);
 
-                $("#fileList .btn_cancel").on("click", function() {
-                    var i = $(this).attr("data");
-                    files_arr.splice(i, 1)
-                    Q.Stop();
-                    $(this).parent().parent().remove();
-                });
-
                 $("#btn_upload").on("click", function() {
-
-                    var idx = 0;
 
                     if (Q.IsUploading()) {
                         //alert("正在上传")
                         //return
                     }
-
 
                     if ($(this).attr("state") == "pause") {
 
@@ -250,9 +228,6 @@
 
                     if ($(this).attr("state") == "start") {
 
-
-                        // Q.SignUrl("http://42.62.26.6/qiniu/index.php");
-
                         Q.addEvent("historyFound", function(his) {
                             if (confirm("文件：" + his + ",未上传完成，是否继续？")) {
                                 Q.ResumeHistory();
@@ -278,6 +253,8 @@
                             $("#td_" + idx).html(
                                 '<strong>上传失败: </strong> ' + msg
                             )
+                            idx++;
+                            up();
                         });
 
                         //上传进度回调
@@ -300,7 +277,7 @@
                             $("#btn_upload").attr("state", "start");
                             $("#btn_upload").html('<span class="glyphicon glyphicon-cloud-upload"></span>上传');
                             $("#td_" + idx).html(
-                                '<strong>文件地址: </strong> <a href="http://qtestbucket.qiniudn.com/' + res.key + '" target="_blank" >http://qtestbucket.qiniudn.com/' + res.key + '</a><br/>' +
+                                '<strong>文件地址: </strong> <a href="http://' + Bucket + '.qiniudn.com/' + res.key + '" target="_blank" >http://' + Bucket + '.qiniudn.com/' + res.key + '</a><br/>' +
                                 '<strong>Hash: </strong>' + res.hash
                             )
                             $("#progressbar" + idx).attr("style", "width: 100%")
@@ -309,17 +286,34 @@
                             up();
                         });
 
-
                         var up = function() {
                             console.log("up...")
                             if (files_arr && files_arr.length) {
+                                $("#btn_upload").prop("disabled", true)
                                 var f = files_arr.pop();
                                 var key = getKey(f.name);
-                                $(this).attr("state", "pause");
-                                $(this).html('<span class="glyphicon glyphicon-pause"></span>暂停');
-                                console.log("uploading file:", f.name, " key:", key);
-                                Q.Upload(f, key);
+                                var xhr = new XMLHttpRequest();
+                                xhr.open('GET', "check.php?key=" + key, true);
+                                xhr.onreadystatechange = function(response) {
+                                    if (xhr.readyState == 4 && xhr.status == 200 && response != "") {
+                                        var res = JSON.parse(xhr.responseText);
+                                        //非常简单的判断
+                                        if (res[0] == null ) {
+                                            console.log("uploading file:", f.name, " key:", key);
+                                            Q.Upload(f, key);
+                                        } else {
+                                            $("#td_" + idx).html(
+                                                '<strong>已存在！ </strong>' +
+                                                '<strong>文件地址: </strong> <a href="http://' + Bucket + '.qiniudn.com/' + key + '" target="_blank" >http://' + Bucket + '.qiniudn.com/' + key + '</a><br/>'
+                                            )
+                                            up();
+                                            idx++;
+                                        }
+                                    }
+                                }
+                                xhr.send();
                             } else {
+                                $("#btn_upload").prop("disabled", false)
                                 bootbox.alert("所有文件上传完成！");
                             }
                         }
@@ -330,6 +324,10 @@
             } else {
                 $("#spdiv").hidden();
             }
+        });
+
+        $("#upladBtn").click(function(event) {
+
         });
     });
     </script>

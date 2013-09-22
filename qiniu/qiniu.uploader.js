@@ -242,37 +242,6 @@ if (typeof FileReader == "undefined") {
 }
 
 (function Qiniu() {
-
-    /*******************
-     *DataBase Interface
-     ********************/
-    var Qiniu_DB = (function DB() {
-
-        if (!Qiniu_historyTag) {
-            return;
-        }
-
-        var _db;
-
-        var DBNAME = "QINIU_DB";
-        var request = window.indexedDB.open(DBNAME);
-
-        request.onerror = function(evt) {
-            return null;
-        };
-
-        request.onsuccess = function(evt) {
-            _db = request.result;
-        };
-
-        var AddProgress = function(key, p) {
-            var transaction = db.transaction(["progress" + key], "readwrite");
-            var oStore = transaction.objectStore("progress");
-            oStore.put(p);
-        };
-
-    })();
-
     var Qiniu_status = new Object();
     var Qiniu_taking = 0;
     var Qiniu_key = null;
@@ -678,6 +647,9 @@ if (typeof FileReader == "undefined") {
         }
         //...n-1,n,end ,up next block
         Qiniu_onBlockPutFinished = function(file, blkIdex, blksize, blkCnt) {
+            if (events["onBlockFinished"]) {
+                fireEvent("onBlockFinished")(file,blkIdex,Qiniu_Progresses[blkIdex]);
+            }
             if (file.size == Qiniu_chunks) {
                 Qiniu_mkfile(file, key, file.size);
                 return;
@@ -697,7 +669,7 @@ if (typeof FileReader == "undefined") {
         }
     };
 
-    //回复上传,需要cookie支持
+    //恢复上传,需要cookie支持
     var Qiniu_ResumeHistory = function() {
 
         if (!Qiniu_file)
@@ -831,6 +803,7 @@ if (typeof FileReader == "undefined") {
         SetPutExtra: function(extra) {
             Qiniu_putExtra = extra;
         },
+
         Histroy: function(his) {
 
             Qiniu_historyTag = his;
@@ -844,4 +817,5 @@ if (typeof FileReader == "undefined") {
             return Qiniu_isUploading;
         }
     };
+
 })();
