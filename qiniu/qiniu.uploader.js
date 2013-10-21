@@ -295,7 +295,13 @@ if (typeof FileReader == "undefined") {
 
     var Qiniu_token = undefined;
 
+    var Qiniu_params = {};
+
     var Qiniu_ReqToken = function() {
+        if (Qiniu_token) {
+            Qiniu_onUpToken(Qiniu_token);
+            return;
+        }
         var xhr = new XMLHttpRequest();
         xhr.open('POST', Qiniu_signUrl, true);
         formData = new FormData();
@@ -544,7 +550,13 @@ if (typeof FileReader == "undefined") {
         }
         body += Qiniu_Progresses[len - 1]["ctx"];
         var xhr = new XMLHttpRequest();
-        var url = Qiniu_UploadUrl + "/rs-mkfile/" + base64encode(utf16to8(Qiniu_bucket + ":" + key)) + "/fsize/" + fsize;
+        var url = Qiniu_UploadUrl + "/mkfile/" + fsize;
+        if (key !== null && key !== undefined) {
+            url = url + "/key/" + base64encode(utf16to8(file.type));
+        }
+        for (var k in Qiniu_params) {
+            url = url + "/" + k + "/" + base64encode(utf16to8(Qiniu_params[k]));
+        }
         if (file.type) {
             url = url + "/mimeType/" + base64encode(utf16to8(file.type));
         }
@@ -600,9 +612,9 @@ if (typeof FileReader == "undefined") {
         }
         //============
 
-        if (!Qiniu_signUrl) {
+        if (!Qiniu_signUrl && !Qiniu_token) {
             if (events["putFailure"]) {
-                fireEvent("putFailure")("signUrl未指定");
+                fireEvent("putFailure")("signUrl或token未指定");
             }
             return;
         }
@@ -721,7 +733,10 @@ if (typeof FileReader == "undefined") {
         xhr.open('POST', Qiniu_UploadUrl, true);
         var formData, startDate;
         formData = new FormData();
-        formData.append('key', key);
+        if (key !== null && key !== undefined) formData.append('key', key);
+        for (var k in Qiniu_params) {
+            formData.append(k, Qiniu_params[k]);
+        }
         formData.append('token', Qiniu_token);
         formData.append('file', f);
         var taking;
@@ -788,6 +803,12 @@ if (typeof FileReader == "undefined") {
             Qiniu_status = null;
         },
         Pause: Qiniu_Pause,
+        AddParams: function(field, value) {
+            Qiniu_params[field] = value;
+        },
+        SetToken: function(token) {
+            Qiniu_token = token;
+        },
         SignUrl: function(url) {
             Qiniu_signUrl = url;
         },
