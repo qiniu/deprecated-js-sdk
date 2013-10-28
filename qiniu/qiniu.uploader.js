@@ -552,7 +552,7 @@ if (typeof FileReader == "undefined") {
         var xhr = new XMLHttpRequest();
         var url = Qiniu_UploadUrl + "/mkfile/" + fsize;
         if (key !== null && key !== undefined) {
-            url = url + "/key/" + base64encode(utf16to8(file.type));
+            url = url + "/key/" + base64encode(utf16to8(key));
         }
         for (var k in Qiniu_params) {
             url = url + "/" + k + "/" + base64encode(utf16to8(Qiniu_params[k]));
@@ -824,7 +824,6 @@ if (typeof FileReader == "undefined") {
         SetPutExtra: function(extra) {
             Qiniu_putExtra = extra;
         },
-
         Histroy: function(his) {
 
             Qiniu_historyTag = his;
