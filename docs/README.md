@@ -2,6 +2,8 @@
 title: js SDK
 ---
 
+# Javascript SDK 使用指南
+
 此 js SDK 适用于除<=MSIE 9.0 的所有浏览器，基于 [七牛云存储官方API](http://docs.qiniu.com/) 构建。具有如下的特点：
 
 1. 通过网页上传任意大小的文件
