@@ -304,7 +304,7 @@ if (typeof FileReader == "undefined") {
         }
         var xhr = new XMLHttpRequest();
         xhr.open('POST', Qiniu_signUrl, true);
-        formData = new FormData();
+        var formData = new FormData();
         if (Qiniu_putExtra) {
             formData.append('putExtra', Qiniu_putExtra);
         }
